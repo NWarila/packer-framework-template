@@ -1,5 +1,9 @@
 name: CI
 
+# Self-validation for packer-framework-template. Exercises the reference
+# framework end-to-end without credentials, while keeping the same repo-quality
+# surface derivative Packer frameworks should inherit.
+
 on:
   push:
     branches: [main]
