@@ -1,0 +1,48 @@
+name: Security
+
+# One visible security entrypoint. The detailed implementations stay in local
+# reusable workflows so consumers can pin the same checks by SHA.
+
+on:
+  branch_protection_rule:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+  schedule:
+    - cron: "0 8 * * 1"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: security-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  iac:
+    name: IaC and secret scan
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    uses: ./.github/workflows/reusable-iac-security.yaml
+
+  codeql:
+    name: CodeQL
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    uses: ./.github/workflows/reusable-codeql.yaml
+
+  scorecard:
+    name: OpenSSF Scorecard
+    if: ${{ github.event_name != 'pull_request' && github.event_name != 'merge_group' }}
+    permissions:
+      security-events: write
+      id-token: write
+      actions: read
+      contents: read
+    uses: ./.github/workflows/reusable-scorecard.yaml

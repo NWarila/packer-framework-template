@@ -1,0 +1,25 @@
+{
+  "config": {
+    "MD003": false,
+    "MD012": {
+      "maximum": 2
+    },
+    "MD013": false,
+    "MD024": {
+      "siblings_only": true
+    },
+    "MD033": false,
+    "MD034": false,
+    "MD036": false,
+    "MD037": false,
+    "MD040": false,
+    "MD046": false,
+    "MD041": false,
+    "MD059": false,
+    "MD060": false
+  },
+  "ignores": [
+    "node_modules/**",
+    "**/node_modules/**"
+  ]
+}

@@ -1,0 +1,128 @@
+name: Reusable OpenSSF Scorecard
+
+# OpenSSF Scorecard supply-chain security analysis. Runs the full Scorecard
+# check suite (branch protection, code review, signed releases, pinned
+# dependencies, vulnerabilities, etc.) and uploads SARIF to the consuming
+# repository's Security tab.
+#
+# Caller pattern (from the combined .github/workflows/security.yaml):
+#
+#   on:
+#     branch_protection_rule:
+#     schedule:
+#       - cron: "17 6 * * 2"
+#     push:
+#       branches: [main]
+#     workflow_dispatch:
+#   permissions: read-all
+#   concurrency:
+#     group: scorecard
+#     cancel-in-progress: false
+#   jobs:
+#     analysis:
+#       permissions:
+#         security-events: write
+#         id-token: write
+#         actions: read
+#         contents: read
+#       uses: <owner>/<template-repo>/.github/workflows/reusable-scorecard.yaml@<40-char-sha>
+#
+# Behavior on private repositories:
+#   - Some Scorecard checks (branch protection, signed releases) require
+#     elevated read access. They will skip gracefully on private repos
+#     without GitHub Advanced Security.
+#   - publish_results is automatically suppressed on private repos by the
+#     scorecard-action itself.
+#
+# Behavior on public repositories:
+#   - publish_results is true by default; aggregate score is published to
+#     OpenSSF metrics (https://api.securityscorecards.dev/) and visible at
+#     https://scorecard.dev/.
+
+on:
+  workflow_call:
+    inputs:
+      publish_results:
+        description: |
+          When true, the aggregate score is published to OpenSSF metrics
+          and visible at https://scorecard.dev/. Requires the repo to be
+          public AND opted into the OpenSSF dataset (auto-opt-in happens
+          on first publish, but the publish itself fails until the repo
+          is registered). Default false so the SARIF still uploads to the
+          Security tab without the publish dependency. Flip to true once
+          you're ready for the public scorecard.dev page.
+        required: false
+        type: boolean
+        default: false
+      results_artifact_retention_days:
+        description: How long to retain the SARIF artifact.
+        required: false
+        type: number
+        default: 5
+
+permissions: {}
+
+jobs:
+  analysis:
+    name: OpenSSF Scorecard
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      security-events: write
+      id-token: write
+      actions: read
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Run Scorecard analysis
+        # renovate: datasource=github-releases depName=ossf/scorecard-action
+        uses: ossf/scorecard-action@99c09fe975337306107572b4fdf4db224cf8e2f2 # v2.4.3
+        # continue-on-error keeps the job green on private repos where
+        # scorecard's GraphQL queries fail with "Resource not accessible
+        # by integration." Private repos can't fully use Scorecard without
+        # a PAT — out of bounds for our no-shared-secrets policy. The
+        # warning still surfaces in the run log; SARIF upload is skipped
+        # by the next step's path check when no results were produced.
+        continue-on-error: true
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: ${{ inputs.publish_results }}
+
+      - name: Check SARIF was produced
+        id: sarif_check
+        if: always()
+        run: |
+          if [ -f results.sarif ]; then
+            echo "produced=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "produced=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::Scorecard analysis did not produce a SARIF file (likely a private repo without sufficient API access). Skipping upload steps."
+          fi
+
+      - name: Upload SARIF artifact
+        # Retains a downloadable copy of the SARIF for forensic review even
+        # if the GitHub Security tab loses it.
+        if: steps.sarif_check.outputs.produced == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: scorecard-sarif
+          path: results.sarif
+          retention-days: ${{ inputs.results_artifact_retention_days }}
+
+      - name: Upload SARIF to GitHub Security
+        # Best-effort: SARIF upload to the Security tab requires GitHub
+        # Advanced Security on private repos. continue-on-error keeps the
+        # job green when the upload itself is rejected; the analysis output
+        # remains visible in the run log and as the artifact above.
+        if: steps.sarif_check.outputs.produced == 'true'
+        uses: github/codeql-action/upload-sarif@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
+        continue-on-error: true
+        with:
+          sarif_file: results.sarif
+          category: scorecard

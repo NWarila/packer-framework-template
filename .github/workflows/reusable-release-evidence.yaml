@@ -1,0 +1,183 @@
+name: Reusable Release Evidence
+
+on:
+  workflow_call:
+    inputs:
+      packer_version:
+        description: Exact Packer version used for framework evidence.
+        required: true
+        type: string
+      repo_type:
+        description: "Explicit repo type for release evidence: framework, runner, or template."
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  evidence:
+    name: Build release evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      attestations: write
+      contents: write
+      id-token: write
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Check out repository at release SHA
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Validate repo type
+        id: type
+        env:
+          REPO_TYPE: ${{ inputs.repo_type }}
+        run: |
+          set -euo pipefail
+          case "${REPO_TYPE}" in
+            framework|runner|template) ;;
+            *)
+              echo "::error::unknown repo type '${REPO_TYPE}'"
+              exit 1
+              ;;
+          esac
+          echo "type=${REPO_TYPE}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Packer
+        if: steps.type.outputs.type == 'framework'
+        env:
+          PACKER_VERSION: ${{ inputs.packer_version }}
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/packer.zip \
+            "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
+          unzip -q /tmp/packer.zip -d /tmp/packer
+          install -m 0755 /tmp/packer/packer /usr/local/bin/packer
+          packer version
+
+      - name: Setup Python
+        if: steps.type.outputs.type == 'framework'
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+
+      - name: Generate framework evidence
+        if: steps.type.outputs.type == 'framework'
+        env:
+          OUT: release-evidence
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT"/{logs,docs,reference}
+          : > "$OUT/.gate-results.tsv"
+
+          record() {
+            printf '%s\t%s\t%s\n' "$1" "$2" "$3" >> "$OUT/.gate-results.tsv"
+          }
+
+          if packer fmt -check -recursive packer examples > "$OUT/logs/packer-fmt.txt" 2>&1; then
+            record "packer fmt" pass "logs/packer-fmt.txt"
+          else
+            record "packer fmt" fail "logs/packer-fmt.txt"
+          fi
+
+          if packer init packer > "$OUT/logs/packer-init.txt" 2>&1; then
+            record "packer init" pass "logs/packer-init.txt"
+          else
+            record "packer init" fail "logs/packer-init.txt"
+          fi
+
+          if packer validate -var-file=examples/linux/reference-linux.pkrvars.hcl packer > "$OUT/logs/packer-validate.txt" 2>&1; then
+            record "packer validate" pass "logs/packer-validate.txt"
+          else
+            record "packer validate" fail "logs/packer-validate.txt"
+          fi
+
+          if [ -f tools/check_docs_layout.py ]; then
+            if python3 tools/check_docs_layout.py > "$OUT/docs/docs-layout.txt" 2>&1; then
+              record "docs layout" pass "docs/docs-layout.txt"
+            else
+              record "docs layout" fail "docs/docs-layout.txt"
+            fi
+          fi
+
+          if [ -f docs/reference/packer.md ]; then
+            cp docs/reference/packer.md "$OUT/reference/packer.md"
+            record "packer reference" pass "reference/packer.md"
+          fi
+
+          {
+            echo "release_sha=${GITHUB_SHA}"
+            echo "release_ref=${GITHUB_REF}"
+            echo "repository=${GITHUB_REPOSITORY}"
+            echo "run_id=${GITHUB_RUN_ID}"
+          } > "$OUT/metadata.txt"
+
+      - name: Render gate-results summary
+        if: steps.type.outputs.type == 'framework'
+        env:
+          OUT: release-evidence
+        run: |
+          set -euo pipefail
+          if [ ! -f "$OUT/.gate-results.tsv" ]; then
+            exit 0
+          fi
+          {
+            echo "## Release evidence - gate results"
+            echo ""
+            echo "| Gate | Result | Evidence |"
+            echo "| --- | --- | --- |"
+            while IFS=$'\t' read -r gate result evidence; do
+              echo "| $gate | $result | \`$evidence\` |"
+            done < "$OUT/.gate-results.tsv"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Bundle evidence
+        run: tar -czf release-evidence.tar.gz release-evidence/
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: release-evidence
+          format: spdx-json
+          output-file: release-evidence.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+          dependency-snapshot: false
+
+      - name: Attest release evidence provenance
+        uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
+        with:
+          subject-path: release-evidence.tar.gz
+
+      - name: Attest release evidence SBOM
+        uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
+        with:
+          subject-path: release-evidence.tar.gz
+          sbom-path: release-evidence.spdx.json
+
+      - name: Upload to workflow run
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-evidence
+          path: |
+            release-evidence.tar.gz
+            release-evidence.spdx.json
+          if-no-files-found: error
+
+      - name: Attach to GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name || github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [ -z "${TAG}" ] || [[ "${TAG}" == refs/* ]]; then
+            echo "::warning::no release tag in context (TAG='${TAG}'); skipping release upload."
+            exit 0
+          fi
+          gh release upload "${TAG}" release-evidence.tar.gz release-evidence.spdx.json
