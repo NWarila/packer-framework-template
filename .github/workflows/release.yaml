@@ -34,7 +34,10 @@ concurrency:
 jobs:
   release-please:
     name: Release Please
-    if: ${{ github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.task == 'release-please') }}
+    # Push-triggered release-please needs the repository setting that allows
+    # GitHub Actions to create pull requests. Keep that path opt-in so a fresh
+    # template repo does not start with a red main check.
+    if: ${{ (github.event_name == 'push' && vars.RELEASE_PLEASE_ON_PUSH == 'true') || (github.event_name == 'workflow_dispatch' && inputs.task == 'release-please') }}
     permissions:
       contents: write
       pull-requests: write
