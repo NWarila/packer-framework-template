@@ -1,0 +1,114 @@
+{
+  "version": "2",
+  "byte_identical": [
+    {
+      "source": ".editorconfig",
+      "target": ".editorconfig"
+    },
+    {
+      "source": ".gitattributes",
+      "target": ".gitattributes"
+    },
+    {
+      "source": ".gitignore",
+      "target": ".gitignore"
+    },
+    {
+      "source": ".markdownlint-cli2.jsonc",
+      "target": ".markdownlint-cli2.jsonc"
+    },
+    {
+      "source": ".pre-commit-config.yaml",
+      "target": ".pre-commit-config.yaml"
+    },
+    {
+      "source": "LICENSE",
+      "target": "LICENSE"
+    },
+    {
+      "source": "Makefile",
+      "target": "Makefile"
+    },
+    {
+      "source": "baseline-manifest.json",
+      "target": "baseline-manifest.json"
+    },
+    {
+      "source": ".github/CODEOWNERS",
+      "target": ".github/CODEOWNERS"
+    },
+    {
+      "source": ".github/PULL_REQUEST_TEMPLATE.md",
+      "target": ".github/PULL_REQUEST_TEMPLATE.md"
+    },
+    {
+      "source": ".github/renovate.json5",
+      "target": ".github/renovate.json5"
+    },
+    {
+      "source": ".github/workflows/ci.yaml",
+      "target": ".github/workflows/ci.yaml"
+    },
+    {
+      "source": ".github/workflows/reusable-codeql.yaml",
+      "target": ".github/workflows/reusable-codeql.yaml"
+    },
+    {
+      "source": ".github/workflows/reusable-iac-security.yaml",
+      "target": ".github/workflows/reusable-iac-security.yaml"
+    },
+    {
+      "source": ".github/workflows/reusable-scorecard.yaml",
+      "target": ".github/workflows/reusable-scorecard.yaml"
+    },
+    {
+      "source": ".github/workflows/security.yaml",
+      "target": ".github/workflows/security.yaml"
+    },
+    {
+      "source": "docs/reference/mirroring.md",
+      "target": "docs/reference/mirroring.md"
+    },
+    {
+      "source": "docs/decision-records/template/README.md",
+      "target": "docs/decision-records/template/README.md"
+    },
+    {
+      "source": "docs/decision-records/template/0001-pin-packer-and-plugin-versions-exactly.md",
+      "target": "docs/decision-records/template/0001-pin-packer-and-plugin-versions-exactly.md"
+    },
+    {
+      "source": "docs/decision-records/template/0002-keep-reference-framework-credential-free.md",
+      "target": "docs/decision-records/template/0002-keep-reference-framework-credential-free.md"
+    },
+    {
+      "source": "tools/build_opa_input.py",
+      "target": "tools/build_opa_input.py"
+    },
+    {
+      "source": "tools/check_adr_schema.py",
+      "target": "tools/check_adr_schema.py"
+    },
+    {
+      "source": "tools/check_baseline_manifest.py",
+      "target": "tools/check_baseline_manifest.py"
+    },
+    {
+      "source": "tools/check_docs_layout.py",
+      "target": "tools/check_docs_layout.py"
+    },
+    {
+      "source": "tools/verify.py",
+      "target": "tools/verify.py"
+    },
+    {
+      "source": "policies/opa/repo_hygiene.rego",
+      "target": "policies/opa/repo_hygiene.rego"
+    },
+    {
+      "source": "policies/opa/repo_hygiene_test.rego",
+      "target": "policies/opa/repo_hygiene_test.rego"
+    }
+  ],
+  "scaffold_starter": []
+}

@@ -1,0 +1,66 @@
+name: Reusable CodeQL
+
+# CodeQL static analysis. Default language matrix is `actions` (analyzes
+# GitHub Actions workflows for injection / supply-chain bugs). Consumers
+# with additional languages (e.g. python tools, javascript) can extend the
+# matrix via the `languages` input.
+#
+# Caller pattern:
+#   uses: <owner>/<template-repo>/.github/workflows/reusable-codeql.yaml@<sha>
+#   permissions:
+#     contents: read
+#     security-events: write
+#     actions: read
+
+on:
+  workflow_call:
+    inputs:
+      languages:
+        description: |
+          JSON array of CodeQL languages to analyze. Defaults to ["actions"]
+          for Packer repos (analyzes only the workflow files, not the
+          Packer HCL which CodeQL doesn't support natively).
+          Consumers with python tools can pass '["actions","python"]'.
+        required: false
+        type: string
+        default: '["actions"]'
+      timeout_minutes:
+        description: Job timeout. Larger codebases may need more.
+        required: false
+        type: number
+        default: 30
+
+permissions: {}
+
+jobs:
+  analyze:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ inputs.timeout_minutes }}
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ${{ fromJSON(inputs.languages) }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
+        # SARIF upload (built into the analyze step) requires GitHub Advanced
+        # Security on private repos. Don't fail the job if the upload itself
+        # fails — analysis findings remain visible in the run log.
+        continue-on-error: true

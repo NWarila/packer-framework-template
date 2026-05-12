@@ -1,0 +1,30 @@
+* text=auto eol=lf
+
+*.hcl        text eol=lf
+*.json       text eol=lf
+*.json5      text eol=lf
+*.md         text eol=lf
+*.pkr.hcl    text eol=lf
+*.pkrvars.hcl text eol=lf
+*.pkrtpl.hcl text eol=lf
+*.py         text eol=lf
+*.rego       text eol=lf
+*.sh         text eol=lf
+*.toml       text eol=lf
+*.yaml       text eol=lf
+*.yml        text eol=lf
+
+Makefile   text eol=lf
+LICENSE    text eol=lf
+
+.github/         export-ignore
+.gitignore       export-ignore
+.gitattributes   export-ignore
+.editorconfig    export-ignore
+.markdownlint-cli2.jsonc export-ignore
+.pre-commit-config.yaml  export-ignore
+CHANGELOG.md     export-ignore
+CODE_OF_CONDUCT.md export-ignore
+CONTRIBUTING.md  export-ignore
+SECURITY.md      export-ignore
+SUPPORT.md       export-ignore

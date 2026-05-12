@@ -1,0 +1,129 @@
+name: Reusable Auto-Merge
+
+# Enables GitHub auto-merge on pull requests authored by trusted bots once
+# all required status checks pass. Branch protection on `main` is what
+# defines the actual gate; this workflow only flips the auto-merge bit.
+#
+# Trusted authors:
+#   - renovate[bot]
+#   - dependabot[bot]
+#
+# Anything not on the trusted list is left alone for human review. We never
+# auto-merge human-authored PRs, and we deliberately do not trust the broad
+# GitHub Actions automation identity. Release-please PRs created by
+# the Actions automation bot are intentionally left for human review.
+#
+# Caller pattern (in each consumer):
+#   name: Auto-Merge
+#   on:
+#     pull_request_target:
+#       types: [opened, reopened, synchronize, ready_for_review, labeled]
+#   permissions:
+#     contents: write
+#     pull-requests: write
+#   jobs:
+#     auto-merge:
+#       uses: <owner>/<template-repo>/.github/workflows/reusable-auto-merge.yaml@<sha>
+#
+# Why pull_request_target is safe here: authorization runs in a read-only job
+# first, and the write-token job is skipped unless the PR author is trusted.
+# The OPA policy also rejects checkout/PR-head references in this workflow and
+# in pull_request_target callers so future edits cannot quietly add PR-content
+# reads under the privileged token.
+#
+# Auto-merge waits for the repo's branch protection required checks to pass
+# before merging. If branch protection isn't configured, GitHub will not
+# allow auto-merge to be enabled at all; `gh pr merge --auto` will fail
+# loudly.
+
+on:
+  workflow_call:
+    inputs:
+      merge_method:
+        description: |
+          Merge strategy used by GitHub auto-merge. One of: squash, merge,
+          rebase. Default: squash. Squash gives every auto-merged change a
+          single deterministic commit on main regardless of bot force-pushes.
+        required: false
+        type: string
+        default: squash
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  authorize-auto-merge:
+    name: Authorize trusted bot auto-merge
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      trusted: ${{ steps.decide.outputs.trusted }}
+    if: |
+      github.event.pull_request.draft == false
+    steps:
+      - name: Decide whether to enable auto-merge
+        id: decide
+        env:
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_AUTHOR_TYPE: ${{ github.event.pull_request.user.type }}
+        run: |
+          set -euo pipefail
+
+          declare -a trusted_authors=(
+            "renovate[bot]"
+            "dependabot[bot]"
+          )
+
+          trusted=0
+          for candidate in "${trusted_authors[@]}"; do
+            if [ "${candidate}" = "${PR_AUTHOR}" ]; then
+              trusted=1
+              break
+            fi
+          done
+          if [ "${trusted}" = "1" ] && [ "${PR_AUTHOR_TYPE}" = "Bot" ]; then
+            echo "PR author '${PR_AUTHOR}' is trusted; enabling auto-merge."
+            echo "trusted=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "PR author '${PR_AUTHOR}' is not in the trusted list; skipping."
+            echo "trusted=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+  enable-auto-merge:
+    name: Enable auto-merge for trusted bot
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: authorize-auto-merge
+    permissions:
+      contents: write
+      pull-requests: write
+    if: needs.authorize-auto-merge.outputs.trusted == 'true'
+    steps:
+      - name: Enable auto-merge
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_REPO: ${{ github.repository }}
+          MERGE_METHOD: ${{ inputs.merge_method }}
+        run: |
+          set -euo pipefail
+          case "${MERGE_METHOD}" in
+            squash|merge|rebase) ;;
+            *)
+              echo "::error::merge_method must be one of squash|merge|rebase, got '${MERGE_METHOD}'"
+              exit 1
+              ;;
+          esac
+          # `gh pr merge --auto` returns success even if the PR is already
+          # set to auto-merge. It fails (and surfaces the GitHub API error)
+          # if branch protection doesn't allow auto-merge or the user lacks
+          # the right scopes. We surface the error as a workflow failure.
+          gh pr merge "${PR_NUMBER}" \
+            --repo "${PR_REPO}" \
+            --auto \
+            "--${MERGE_METHOD}"
+          echo "auto-merge enabled on PR #${PR_NUMBER} (${MERGE_METHOD})"

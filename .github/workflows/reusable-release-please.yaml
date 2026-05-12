@@ -1,0 +1,78 @@
+name: Reusable Release Please
+
+# Standard release-please integration shared across every consumer. Watches
+# main for Conventional Commits, opens a release PR, and on merge of that
+# PR tags + publishes a GitHub release. Every consumer also has a
+# optional `release.yaml` caller can run release evidence; this workflow
+# dispatches that task on every release so the new tag gets a uniform evidence
+# bundle attached.
+#
+# Caller pattern (in each consumer):
+#   name: Release
+#   on:
+#     push:
+#       branches: [main]
+#     workflow_dispatch:
+#   permissions:
+#     contents: write
+#     pull-requests: write
+#     issues: write
+#     actions: write
+#   jobs:
+#     release:
+#       uses: <owner>/<template-repo>/.github/workflows/reusable-release-please.yaml@<sha>
+
+on:
+  workflow_call:
+    inputs:
+      config_file:
+        description: Path to release-please-config.json relative to the consumer root.
+        required: false
+        type: string
+        default: release-please-config.json
+      manifest_file:
+        description: Path to .release-please-manifest.json relative to the consumer root.
+        required: false
+        type: string
+        default: .release-please-manifest.json
+    outputs:
+      release_created:
+        description: "true when release-please created a release on this run."
+        value: ${{ jobs.release-please.outputs.release_created }}
+      tag_name:
+        description: Tag name of the release that was created (empty when none).
+        value: ${{ jobs.release-please.outputs.tag_name }}
+
+permissions:
+  contents: read
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: write
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          config-file: ${{ inputs.config_file }}
+          manifest-file: ${{ inputs.manifest_file }}
+
+      - name: Dispatch release evidence
+        if: ${{ steps.release.outputs.release_created == 'true' }}
+        env:
+          # workflow_dispatch triggered by GITHUB_TOKEN is allowed by GitHub,
+          # unlike most cascading workflow events.
+          GH_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ steps.release.outputs.tag_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: gh workflow run release.yaml --field task=release-evidence --ref "$TAG_NAME" --repo "$REPOSITORY"

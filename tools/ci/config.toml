@@ -1,0 +1,10 @@
+repo_role = "framework"
+artifact_root = "packer/artifacts"
+default_case = "reference-linux"
+packer_root = "packer"
+
+[[cases]]
+name = "reference-linux"
+var_file = "examples/linux/reference-linux.pkrvars.hcl"
+install_template = "examples/linux/cloud-init.pkrtpl.hcl"
+build = true
