@@ -1,16 +1,73 @@
 # Threat Model
 
-The template assumes two primary risk areas:
+This document is a STRIDE-style threat model for `NWarila/packer-framework-template` and, by extension, the Packer framework pattern this template demonstrates. It exists to make the security posture of derivative image frameworks legible: a real framework building real VM images inherits the same trust boundaries and adds whatever its hypervisor, cloud, ISO, and artifact registry introduce.
 
-- Supply-chain drift in GitHub Actions, Packer, plugins, Python tooling, and policy tools.
-- Credential leakage from image-building workflows.
+## Scope
 
-Controls:
+What this document covers:
 
-- GitHub Actions must be pinned to full commit SHAs.
-- Packer and plugin versions must use exact pins.
-- The reference framework uses no real infrastructure credentials.
-- Secret scanning and CodeQL reusable workflows are part of the default repo surface.
-- Sensitive Packer variables demonstrate redaction without storing usable secrets.
+- The template repository's own threats: supply chain, CI compromise, contributor account compromise, and dependency drift.
+- Threats inherent to the Packer framework pattern: image-build credential leakage, unreviewed plugin changes, installer-template tampering, and evidence/artifact confusion.
+- Threats derivative frameworks should account for when they replace the `null` source with Proxmox, cloud, VMware, or another real builder.
 
-Real image frameworks should extend this model with provider-specific risks such as hypervisor API tokens, ISO provenance, artifact signing, and image publication permissions.
+What this document does not cover:
+
+- Threats specific to a real hypervisor or cloud API. Derivative frameworks own those addenda.
+- Guest OS hardening posture. This template validates the framework contract, not a CIS or STIG profile.
+- Operational runbooks. Incident response procedures live in each consumer's `docs/how-to/`, not here.
+
+## Trust Boundaries
+
+1. **Author to Repository.** Authors commit Packer HCL, workflows, policies, and docs. Trust depends on GitHub account security, review discipline, and branch protection.
+2. **Repository to CI runner.** CI checks out the repo onto GitHub-hosted runners. Trust depends on GitHub runner-image integrity and Actions permissions.
+3. **CI runner to Packer release/plugin sources.** `packer init` downloads pinned plugins and CI installs the pinned Packer binary. Trust depends on upstream release integrity and exact pins.
+4. **Packer framework to installer templates.** Consumer-provided install templates are rendered into image build input. Trust depends on review of those templates and strict separation between framework-owned normalization and consumer-owned content.
+5. **Packer framework to provider APIs.** The reference framework does not cross this boundary. Derivative frameworks do when they talk to Proxmox, AWS, VMware, Azure, or another image target.
+6. **Build output to artifact consumers.** The reference only writes local evidence. Real frameworks may publish templates, AMIs, images, checksums, SBOMs, or attestations.
+
+## Threats By Category
+
+### Spoofing
+
+- **Compromised commit on the template repo.** An attacker with author access commits malicious workflow YAML or Packer HCL. Mitigation: branch protection, code-owner review, SHA-pinned Actions, and OPA policy enforcement.
+- **Spoofed GitHub Action dependency.** A workflow uses a tag or branch that later moves. Mitigation: `repo_hygiene.rego` requires full 40-character SHA pins, local reusable workflows, or digest-pinned Docker actions.
+- **Spoofed Packer plugin release.** A malicious plugin version is accepted silently. Mitigation: `packer/packer.pkr.hcl` pins plugin versions exactly, and Renovate opens reviewable updates.
+
+### Tampering
+
+- **Installer-template tampering.** A consumer changes a cloud-init, Kickstart, Autounattend, or preseed template in a way that weakens the image. Mitigation: the template keeps installer templates under reviewable source control and renders them into build evidence. Real frameworks should add OS-specific policy tests.
+- **Build evidence mutation.** Generated manifests or rendered installer files could be mistaken for source truth. Mitigation: generated evidence under `packer/artifacts/` and `packer/manifests/` is ignored by default; source HCL and example templates are the reviewed inputs.
+- **Workflow tampering through privileged PR events.** `pull_request_target` could execute PR-controlled content with a write token. Mitigation: only `auto-merge.yaml` may use `pull_request_target`, and OPA rejects unsafe PR-content reads in that path.
+
+### Repudiation
+
+- **An author denies a release-affecting change.** Mitigation: Git history, PR review, workflow runs, and release-please-generated changelog entries provide durable attribution.
+- **A framework consumer denies which inputs built an image.** Mitigation: the reference build writes `build-context.json` and a Packer manifest. Real frameworks should preserve image key, source commit, input file, builder, and artifact identifiers in release evidence.
+
+### Information Disclosure
+
+- **Packer variables leak provider credentials.** A real image build may use hypervisor API tokens, SSH keys, WinRM passwords, or cloud credentials. Mitigation: the reference uses no real credentials and demonstrates sensitive-variable handling. Derivative frameworks must keep secrets in GitHub secrets/OIDC and avoid echoing derived values.
+- **Workflow logs reveal rendered installer secrets.** Installer templates can embed bootstrap users, tokens, or passwords. Mitigation: the reference templates contain no usable secrets. Real frameworks should avoid printing rendered templates and should use provider or guest mechanisms that do not expose long-lived secrets.
+- **Public repo accidentally tracks generated artifacts.** Generated images, manifests, or local caches can contain sensitive metadata. Mitigation: default-deny `.gitignore` tracks only allowlisted files and keeps generated evidence untracked by default.
+
+### Denial Of Service
+
+- **Packer/plugin release source unavailable.** CI fails during installation or `packer init`. Mitigation: exact pins make the failure explicit. Air-gapped frameworks can document a mirror strategy in repo-tier ADRs.
+- **Provider API unavailable.** Derivative frameworks fail real builds when Proxmox/cloud APIs are down. Mitigation: outside this template; real frameworks should document retry and recovery posture.
+- **Long-running image builds exhaust CI minutes.** Real image builds can be expensive. Mitigation: this template's reference build is fast; real frameworks should separate cheap validation from trusted publish builds.
+
+### Elevation Of Privilege
+
+- **Over-scoped provider credentials.** A Packer API token can create, modify, or delete more infrastructure than the image build needs. Mitigation: derivative frameworks should scope tokens or OIDC roles to least privilege and document them in repo-tier threat models.
+- **Workflow token over-permission.** A job that only validates Packer should not write contents or releases. Mitigation: workflows default to `contents: read`; write permissions are isolated to release and auto-merge surfaces.
+- **Consumer content becomes framework code.** If a future reusable build overlays consumer content into framework paths, it could alter workflow or source files. Mitigation: this template does not currently implement overlay. Any future overlay must constrain destinations and carry tests equivalent to the Terraform framework overlay helper.
+
+## What A Derivative Framework Adds
+
+A real Packer framework inherits this threat model and adds, at minimum:
+
+- Provider-specific credential handling and least-privilege permissions.
+- ISO/media provenance and checksum policy.
+- Guest OS hardening assumptions and bootstrap-secret handling.
+- Artifact publication, signing, retention, and rollback behavior.
+- Incident response for compromised images and revoked build credentials.
