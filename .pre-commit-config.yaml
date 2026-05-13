@@ -25,6 +25,12 @@ repos:
       - id: actionlint
         files: ^\.github/workflows/.*\.ya?ml$
 
+  - repo: https://github.com/koalaman/shellcheck-precommit
+    rev: 99470f5e12208ff0fb17ab81c3c494f7620a1d8d # v0.11.0
+    hooks:
+      - id: shellcheck
+        files: ^tools/ci/.*\.sh$
+
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: 996abf60411a8d954288ac9856aae7602b80cbda # v0.22.1
     hooks:
@@ -41,6 +47,20 @@ repos:
         language: system
         pass_filenames: false
         files: ^(packer|examples)/.*\.(pkr|pkrvars|pkrtpl)\.hcl$
+
+      - id: packer-docs
+        name: packer docs
+        entry: python tools/gen_packer_docs.py
+        language: system
+        pass_filenames: false
+        files: ^packer/variables\.pkr\.hcl$|^docs/reference/packer\.md$|^tools/gen_packer_docs\.py$
+
+      - id: packer-plugin-provenance
+        name: packer plugin provenance
+        entry: python tools/check_packer_plugin_provenance.py
+        language: system
+        pass_filenames: false
+        files: ^packer/packer\.pkr\.hcl$|^packer/plugin-provenance\.json$|^tools/check_packer_plugin_provenance\.py$
 
       - id: docs-layout
         name: docs layout

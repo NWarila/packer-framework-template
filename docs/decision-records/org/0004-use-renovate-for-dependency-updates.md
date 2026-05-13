@@ -13,11 +13,11 @@
 
 ## TL;DR
 
-All `nwarila-platform/*` repositories track dependency updates via [Renovate](https://docs.renovatebot.com/). Each **type-template** in the portfolio (e.g. `NWarila/terraform-runner-template`, `NWarila/packer-template`, `NWarila/python-template`) owns a complete, self-contained `renovate.json5` that is the canonical Renovate baseline for every consumer of that template. Consumers' local `.github/renovate.json5` extends only their type-template (e.g. `extends: ["github>NWarila/terraform-runner-template"]`) and adds only the overrides genuinely specific to that consumer. There is **no** org-level shared `renovate.json5` — the org repo (`nwarila-platform/.github`) holds ADRs and policies, not Renovate config. Renovate replaces Dependabot at the org level because Dependabot does not update Terraform's `required_version` field and has incomplete coverage of pinned tool versions in adjacent tooling. The per-template-baseline pattern keeps each stack's Renovate policy self-contained, lets stacks evolve their settings independently, and aligns with the three-tier ADR model from [ADR-0001](0001-use-architecture-decision-records.md): stack-level concerns live at the template tier, not the org tier.
+All `NWarila/*` repositories track dependency updates via [Renovate](https://docs.renovatebot.com/). Each **type-template** in the portfolio (e.g. `NWarila/terraform-runner-template`, `NWarila/terraform-framework-template`, `NWarila/packer-template`, `NWarila/python-template`) owns a complete, self-contained `renovate.json5` that is the canonical Renovate baseline for every consumer of that template. Consumers' local `.github/renovate.json5` extends only their type-template (e.g. `extends: ["github>NWarila/terraform-runner-template"]`) and adds only the overrides genuinely specific to that consumer. There is **no** org-level shared `renovate.json5` — the org repo (`NWarila/.github`) holds ADRs and policies, not Renovate config. Renovate replaces Dependabot at the org level because Dependabot does not update Terraform's `required_version` field and has incomplete coverage of pinned tool versions in adjacent tooling. The per-template-baseline pattern keeps each stack's Renovate policy self-contained, lets stacks evolve their settings independently, and aligns with the three-tier ADR model from [ADR-0001](0001-use-architecture-decision-records.md): stack-level concerns live at the template tier, not the org tier.
 
 ## Context and Problem Statement
 
-Repositories under the `nwarila-platform` organization track several version-pin surfaces that need automated updates:
+Repositories under the `NWarila` organization track several version-pin surfaces that need automated updates:
 
 - **GitHub Actions** referenced by full commit SHA in workflow files, per the org's SHA-pin policy.
 - **Terraform** version constraints — `required_version` on the `terraform` block, and provider versions in `required_providers`.
@@ -48,7 +48,7 @@ The following forces shaped this decision:
 
 1. **Stay on Dependabot org-wide.** Continue with per-repo `.github/dependabot.yml`, accepting the `required_version` gap and per-repo cadence drift.
 2. **Adopt Renovate per-repo with no shared baseline at all.** Each repo maintains its own `.github/renovate.json5` from scratch.
-3. **Adopt Renovate with a single shared org baseline.** All settings live in `nwarila-platform/.github/.github/renovate.json5`; every consuming repo extends it directly.
+3. **Adopt Renovate with a single shared org baseline.** All settings live in `NWarila/.github/.github/renovate.json5`; every consuming repo extends it directly.
 4. **Adopt Renovate with self-contained type-template baselines.** Each type-template (Terraform, Packer, Python, etc.) owns a complete `renovate.json5`. Consumers extend their type-template only. No org-level Renovate config.
 5. **Adopt Renovate with an org→template→consumer extends chain.** Truly universal settings at the org tier; stack-specific at the template tier; consumer-specific at the repo tier; consumers extend the template, which transitively extends the org.
 6. **Mix Dependabot for legacy repos and Renovate for new repos.** Run both tools depending on repo age.
@@ -60,7 +60,7 @@ Chosen option: **Option 4, Renovate with self-contained type-template baselines.
 
 Each **type-template** in the portfolio owns a complete, self-contained `.github/renovate.json5` that is the single source of truth for its stack. Consumers of that template extend only the template; there is no org-level `renovate.json5` and consumers do not extend more than one config.
 
-The Terraform-runner template's baseline (`NWarila/terraform-runner-template/.github/renovate.json5`) is the canonical pattern. Other type-templates (`NWarila/packer-template`, `NWarila/python-template`, etc.) carry their own baselines tailored to their stack as they're brought online.
+The Terraform-runner template's baseline (`NWarila/terraform-runner-template/.github/renovate.json5`) is the canonical pattern. Other type-templates (`NWarila/terraform-framework-template`, `NWarila/packer-template`, `NWarila/python-template`, etc.) carry their own baselines tailored to their stack as they're brought online.
 
 Each type-template baseline configures, at minimum:
 
@@ -70,7 +70,7 @@ Each type-template baseline configures, at minimum:
 - `:dependencyDashboard` so each consumer gets a single tracking issue rather than a flood of standalone PRs.
 - `prConcurrentLimit: 5` to cap noise during update bursts.
 - A `packageRules` entry that maps `github-actions` updates to `ci(deps): ...` Conventional Commit prefixes with `pinDigests: true` to preserve SHA-pin format.
-- Stack-specific settings — for Terraform: `terraform.rangeStrategy: "pin"` per the template's own ADR pinning Terraform versions exactly; `enabledManagers: ["github-actions", "terraform", "pip_requirements", "custom.regex"]`; the `customManagers` regex for `# renovate:` annotations in workflow comments.
+- Stack-specific settings — for Terraform: `terraform.rangeStrategy: "pin"` per [ADR-0005](0005-pin-terraform-and-provider-versions-exactly.md); `enabledManagers: ["github-actions", "terraform", "pip_requirements", "custom.regex"]`; the `customManagers` regex for `# renovate:` annotations in workflow comments.
 
 Each adopting consumer carries a minimal `.github/renovate.json5` that:
 
@@ -81,7 +81,7 @@ The `.github/dependabot.yml` file MUST NOT exist in any adopting repository. Rep
 
 Renovate enablement requires the Renovate GitHub App to be installed against each repository or against the entire org. Installation is a one-time operation outside the repo's git history and is the maintainer's responsibility.
 
-The org repo (`nwarila-platform/.github`) intentionally holds **no** `renovate.json5`. The org tier exists for ADRs and policies that genuinely apply to every repo regardless of stack; Renovate config does not. A truly universal Renovate setting (if one ever genuinely arose that applied to Terraform AND Packer AND Python AND PowerShell consumers identically) would still be added to each type-template independently rather than centralised.
+The org repo (`NWarila/.github`) intentionally holds **no** `renovate.json5`. The org tier exists for ADRs and policies that genuinely apply to every repo regardless of stack; Renovate config does not. A truly universal Renovate setting (if one ever genuinely arose that applied to Terraform AND Packer AND Python AND PowerShell consumers identically) would still be added to each type-template independently rather than centralised.
 
 ## Pros and Cons of the Options
 
@@ -155,9 +155,9 @@ Adherence to this ADR is confirmed by the following mechanisms. The wording `MUS
 3. **SHA-pin retention check.** Every type-template's `.github/renovate.json5` MUST configure `pinDigests: true` for the `github-actions` manager (typically via a `packageRules` entry). A reviewer SHOULD reject a PR to a type-template baseline that removes or disables this setting without a superseding ADR.
 4. **Schedule check.** Every type-template's `.github/renovate.json5` MUST schedule weekly or less-frequent runs. Daily or more-frequent schedules would produce avoidable PR churn across every consumer of that template.
 5. **Override discipline.** Repository-local overrides MUST be limited to repo-specific concerns. Settings that should apply to every consumer of a particular type-template MUST be added to that type-template's `renovate.json5` rather than copy-pasted into every consumer. There is no org-level Renovate baseline; settings that would otherwise be "truly universal" are duplicated across each type-template independently to preserve stack independence (see Option 4 §"Neutral").
-6. **No org-level Renovate config.** `nwarila-platform/.github/.github/renovate.json5` MUST NOT exist. The org repo holds ADRs and policies, not Renovate config. A maintainer who is tempted to centralise a setting "because it applies to every template" SHOULD instead add it to each template's baseline; the duplication cost is small and the stack independence is worth more.
-7. **Editorial rule.** A change of dependency-update tool (back to Dependabot, or to a third option) is itself an architectural decision and MUST be recorded as a superseding ADR. Adoption or removal of a type-template's Renovate baseline is a template-tier decision and MUST be recorded as an ADR in that type-template's own `docs/decision-records/` directory.
-8. **Release-age quarantine check.** Every type-template's `.github/renovate.json5` MUST set top-level `"minimumReleaseAge": "7 days"` and `"internalChecksFilter": "strict"` so Renovate waits for the release-age window and fails closed when release timestamps are unavailable. A reviewer SHOULD reject a type-template baseline PR that removes or lowers this guard without a superseding ADR. No vulnerability-alert carve-out is configured by default; if a CVE-driven immediate-bump policy becomes necessary, the carve-out MUST be explicitly scoped and recorded in a superseding ADR.
+6. **No org-level Renovate config.** `NWarila/.github/.github/renovate.json5` MUST NOT exist. The org repo holds ADRs and policies, not Renovate config. A maintainer who is tempted to centralise a setting "because it applies to every template" SHOULD instead add it to each template's baseline; the duplication cost is small and the stack independence is worth more.
+7. **Editorial rule.** A change of dependency-update tool (back to Dependabot, or to a third option) is itself an architectural decision and MUST be recorded as a superseding ADR. Adoption or removal of a type-template's Renovate baseline is a template-tier decision and MUST be recorded as an ADR in that type-template's own `docs/decision-records/template/` directory.
+8. **Minimum-release-age + strict-timestamp check.** Every type-template's `.github/renovate.json5` MUST set `minimumReleaseAge: "7 days"` and `internalChecksFilter: "strict"`. The 7-day quarantine window blocks the common compromised-package pattern where a malicious release is published and then yanked within hours or days; consumers that only consider releases at least seven days old never observe the yanked window. The `"strict"` filter mode is required because Renovate's default behavior (`"none"`) silently allows updates whose timestamps it cannot resolve, which would defeat the quarantine for any datasource that omits timestamp metadata. Strict mode treats unresolvable timestamps as failing the age check, which is the conservative choice for a supply-chain control. A template-tier baseline that omits either setting, or sets `minimumReleaseAge` below seven days, requires a superseding ADR documenting the relaxation and its rationale. A CVE-driven immediate-bump carve-out via `vulnerabilityAlerts.minimumReleaseAge: "0 days"` is permitted at the type-template tier provided the carve-out is recorded as a separate Confirmation item or a follow-up ADR in that template's `docs/decision-records/template/`.
 
 Enforcement tooling is recommended but not mandatory at acceptance time. A repository MAY add CI scripts that verify (1)–(3); template adoption MAY be tracked via the drift-gate workflow that mirrors ADRs from the appropriate sources.
 
@@ -183,7 +183,7 @@ Enforcement tooling is recommended but not mandatory at acceptance time. A repos
 ### Neutral
 
 - The `github>` extends syntax creates a runtime dependency on `NWarila/<type-template>` being reachable when Renovate evaluates a consuming repo. In practice this is reliable; if it becomes unreliable, consumers MAY temporarily inline the template baseline.
-- This ADR scopes the decision to the `nwarila-platform` organization. If `NWarila/*` user-account repos adopt Renovate later (other than as type-templates, which they already are), they reference this ADR as the canonical pattern but extend their relevant type-template directly.
+- This ADR scopes the decision to the `NWarila` organization. The functionally-identical `nwarila-platform` organization carries its own ADR-0004 documenting the same per-template-baseline pattern with `nwarila-platform/*` scoping; the two ADRs are maintained in parallel per the portfolio's org-separation practice. Cross-org consumers (e.g., an `nwarila-platform/*` runner consuming `NWarila/terraform-runner-template` via `extends: ["github>NWarila/terraform-runner-template"]`) inherit the type-template's behavior regardless of which org's `.github` is read for community-health policy.
 - Repo-specific overrides remain permitted; this ADR is not a uniformity-at-all-costs mandate. The only constraint is that overrides MUST be repo-specific concerns. Stack-wide concerns belong in the type-template tier per ADR-0001.
 
 ## Assumptions
@@ -197,7 +197,7 @@ This decision rests on the following assumptions. If any becomes false, this ADR
 
 ## Supersedes
 
-None — `.github/dependabot.yml` files in `nwarila-platform/*` repos were single-ecosystem configurations with no prior ADR documenting their adoption. This ADR replaces that pattern as a new decision rather than as a formal supersession.
+None — `.github/dependabot.yml` files in `NWarila/*` repos were single-ecosystem configurations with no prior ADR documenting their adoption. This ADR replaces that pattern as a new decision rather than as a formal supersession.
 
 ## Superseded by
 
@@ -211,14 +211,14 @@ Pending. Each type-template's `.github/renovate.json5` is the source of truth fo
 
 - [ADR-0001](0001-use-architecture-decision-records.md) — establishes the format and three-tier scope structure of decision records. The per-template-baseline pattern in this ADR mirrors that three-tier model: stack-level concerns live at the template tier.
 - [ADR-0003](0003-use-deny-all-gitignore-strategy.md) — establishes the deny-all `.gitignore` strategy. Renovate config files are explicitly allowlisted in adopting repositories per ADR-0003.
-- [`NWarila/terraform-runner-template` ADR-template/0001](https://github.com/NWarila/terraform-runner-template/blob/main/docs/decision-records/template/0001-pin-terraform-and-provider-versions-exactly.md) — the template-tier decision pinning Terraform and provider versions exactly. The Terraform-runner template's `renovate.json5` sets `terraform.rangeStrategy: "pin"` per that ADR. Per-template baselines mean each stack records its own analogous decisions in its own ADRs.
+- [ADR-0005](0005-pin-terraform-and-provider-versions-exactly.md) — pins Terraform and provider versions exactly across the org. Each Terraform-shape type-template's `renovate.json5` sets `terraform.rangeStrategy: "pin"` per that ADR. Per-template baselines mean each stack records its own analogous decisions in its own ADRs where applicable.
 
 ## Compliance Notes
 
-This ADR preserves the SHA-pin policy (encoded in the shared baseline as `github-actions.pinDigests: true`). It does not modify branch-protection or PR-review requirements: every Renovate PR is subject to the same `main`-branch protections as a human-authored PR, including required status checks. Future ADRs that adopt additional managers (e.g., `pre-commit`, `pip`, `docker`) inherit this ADR's defaults and need only document scope-specific divergence in repo-local config.
+This ADR preserves the SHA-pin policy (encoded in each type-template's baseline as `github-actions.pinDigests: true`). It does not modify branch-protection or PR-review requirements: every Renovate PR is subject to the same `main`-branch protections as a human-authored PR, including required status checks. Future ADRs that adopt additional managers (e.g., `pre-commit`, `pip`, `docker`) inherit this ADR's defaults and need only document scope-specific divergence in repo-local config.
 
 | Framework              | Control / Practice ID                                                | Potential Evidence Contribution                                                                                                |
 | ---------------------- | -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | NIST SP 800-53 Rev. 5  | SI-2 (Flaw Remediation)                                              | Renovate's automated update PRs contribute to the timely application of patches and security fixes across the org.            |
-| NIST SP 800-53 Rev. 5  | CM-3 (Configuration Change Control)                                  | The shared-baseline pattern records org-wide dependency-management policy in source control with PR review history.            |
+| NIST SP 800-53 Rev. 5  | CM-3 (Configuration Change Control)                                  | The per-template-baseline pattern records stack-wide dependency-management policy in source control with PR review history.    |
 | NIST SP 800-218 (SSDF) | PW.4 (Reuse Existing, Well-Secured Software When Feasible)           | Tracking dependency updates with SHA-pin retention preserves the supply-chain integrity posture for reused software.           |

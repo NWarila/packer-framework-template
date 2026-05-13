@@ -1,8 +1,8 @@
 # packer-framework-template
 
-Reference template for building Packer framework repositories: repos that own a reusable image-building contract, validation tooling, release evidence, and downstream integration pattern while consumer repos bring their own image data, installer templates, and provisioning content.
+Reference template for building Packer framework repositories: repos that own a reusable image-building contract, validation tooling, and release evidence. It is not a Packer runner template; runner repositories own scheduling, promotion, environment approvals, and provider-specific publish behavior.
 
-This template is intentionally credential-free. It uses Packer's `null` builder to prove the framework contract without touching a hypervisor, cloud account, ISO store, or secret. Real frameworks, such as `nwarila-platform/proxmox-packer-framework`, replace the source block and provider-specific variables while keeping the same repo-quality surface.
+This template is intentionally credential-free. It uses Packer's `file` builder to prove that rendered installer content is consumed by a build without touching a hypervisor, cloud account, ISO store, or secret. Real frameworks, such as `nwarila-platform/proxmox-packer-framework`, replace the source block and provider-specific variables while keeping the same repo-quality surface.
 
 ## Prerequisites
 
@@ -33,7 +33,7 @@ python tools/verify.py integration
 | [`packer/locals.pkr.hcl`](packer/locals.pkr.hcl) | Normalization, defaults, and template rendering. |
 | [`packer/source.pkr.hcl`](packer/source.pkr.hcl) | Credential-free reference builder. Real frameworks replace this. |
 | [`packer/builds.pkr.hcl`](packer/builds.pkr.hcl) | Build orchestration and release evidence output. |
-| [`examples/`](examples/) | Linux and Windows example consumer var files/templates. |
+| [`examples/`](examples/) | Linux and Windows example framework input files/templates. |
 
 ## What This Is, And What It Isn't
 
@@ -73,9 +73,12 @@ For a real Packer framework derived from this template, edit these first:
 2. `packer/source.pkr.hcl` and provider-specific variables.
 3. `examples/` for the supported guest OS families.
 4. `docs/decision-records/repo/` for local decisions.
-5. Optional release and deploy workflows, only if the repo publishes versioned releases or artifacts.
+5. Optional release and framework-build workflows, only if the framework publishes versioned releases or generated evidence.
 
 The mirroring rules live in [`docs/reference/mirroring.md`](docs/reference/mirroring.md).
+Runner repositories that call this framework should follow the pinned checkout,
+overlay, var-file, and release-evidence protocol in
+[`docs/reference/runner-protocol.md`](docs/reference/runner-protocol.md).
 
 ## License
 

@@ -1,0 +1,34 @@
+name: Drift Gate
+
+# Verifies that this template's mirrored copies of upstream baseline
+# files are byte-identical to their canonical sources at SHA-pinned
+# revisions.
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+concurrency:
+  group: drift-gate-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  org-baseline:
+    name: org-baseline / verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Drift gate (org baseline)
+        # renovate: datasource=git-refs depName=NWarila/drift-gate
+        uses: NWarila/drift-gate@a29b46ba971b55956994d51684c44d6861f7b4bf # main @ 2026-05-11
+        with:
+          source-repo: NWarila/.github
+          # renovate: depName=NWarila/.github packageName=NWarila/.github currentValue=main
+          source-ref: 85ba4252d721fa8d5540b67391786944f6d0f6ff # org baseline manifest @ 2026-05-13
+          manifest: baseline-manifest.json
+          check-name: org-baseline / verify

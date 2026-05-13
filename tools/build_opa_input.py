@@ -13,7 +13,7 @@ from typing import Any
 
 USES_LINE_RE = re.compile(r"^\s*(?:-\s*)?uses:\s*(.+?)\s*(?:#.*)?$")
 WORKFLOW_GLOBS = ("*.yml", "*.yaml")
-POLICY_FILE_PATHS = ("packer/packer.pkr.hcl",)
+POLICY_FILE_PATHS = ("packer/packer.pkr.hcl", "packer/plugin-provenance.json")
 
 
 def normalize_uses(value: str) -> str:

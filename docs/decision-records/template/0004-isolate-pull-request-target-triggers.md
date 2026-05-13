@@ -35,14 +35,14 @@ metadata and the special permissions model of `pull_request_target`.
 
 Framework repositories need a simple rule that keeps the exceptional trigger
 exceptional. Auto-merge can use `pull_request_target` because it does not check
-out or execute PR-controlled code. Release and deploy workflows do not need that
+out or execute PR-controlled code. Release and framework-build workflows do not need that
 trigger, so they must not carry it.
 
 ## Decision Drivers
 
 1. **Least privilege.** Workflows should receive the privileged PR event only
    when the job cannot function without it.
-2. **Review locality.** Release and deploy changes should be reviewable without
+2. **Review locality.** Release and framework-build changes should be reviewable without
    also auditing the privileged PR trigger model.
 3. **Artifact integrity.** Release evidence and attestations should be produced
    only from trusted release events or explicit maintainer dispatch.

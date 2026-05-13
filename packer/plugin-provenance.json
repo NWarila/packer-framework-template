@@ -1,0 +1,27 @@
+{
+  "version": "1",
+  "plugins": [
+    {
+      "name": "git",
+      "source": "github.com/ethanmdavidson/git",
+      "version": "0.6.5",
+      "upstream_sha256sums_url": "https://github.com/ethanmdavidson/packer-plugin-git/releases/download/v0.6.5/packer-plugin-git_v0.6.5_SHA256SUMS",
+      "checksums": {
+        "packer-plugin-git_v0.6.5_x5.0_darwin_amd64.zip": "f5be8948480423647b176fa7d8ee8b5d03ee268941065a7d6be5aa5c3b5b51b5",
+        "packer-plugin-git_v0.6.5_x5.0_darwin_arm64.zip": "850af39426543324288109c68b03b42294c4dda74408fc4b38d515c4f44a9f48",
+        "packer-plugin-git_v0.6.5_x5.0_freebsd_386.zip": "ee034fcd5a11a438a8ebe558860951adf356fa2238c584754c5c398f04bf4ec9",
+        "packer-plugin-git_v0.6.5_x5.0_freebsd_amd64.zip": "b712926b17a044ce357a11724e17f04387f687275723c11146024ab6aa854f7b",
+        "packer-plugin-git_v0.6.5_x5.0_freebsd_arm.zip": "2a7c129a963a14ce78c7a6bcfe1b59839b2fb7e1d6bc059feeb57dd7beab3442",
+        "packer-plugin-git_v0.6.5_x5.0_freebsd_arm64.zip": "1333501a6c56c473c961cfc8daede64af9db5288c4620b49863bc7b51328700f",
+        "packer-plugin-git_v0.6.5_x5.0_linux_386.zip": "4b3f74f5139396d55e3708df84407c3c1407c91e1cba8f46b4581fac62e8679f",
+        "packer-plugin-git_v0.6.5_x5.0_linux_amd64.zip": "ff1a0eb11d9fa71f16761f6bc6e2ae0e1005b331c8f3b4a3d31077224c677a7a",
+        "packer-plugin-git_v0.6.5_x5.0_linux_arm.zip": "a2674d237a19ff17705ee24c30b8bd6bcf5839b78ebc7eac663b11b650f66d29",
+        "packer-plugin-git_v0.6.5_x5.0_linux_arm64.zip": "0cc090b56f4e2f6356bb480b3f4a0e39f0ef34e9376e8a5a8b14182a538cdd73",
+        "packer-plugin-git_v0.6.5_x5.0_windows_386.zip": "99a3944fa39229ca561e6cb91f106f568bb0ad8ffc448a68e76f8a8c743ae00c",
+        "packer-plugin-git_v0.6.5_x5.0_windows_amd64.zip": "169948586ba96d3b477f60fa21e0d277c6049ec7fa1a3d145b5778b5e476eb92",
+        "packer-plugin-git_v0.6.5_x5.0_windows_arm.zip": "40e65621310559d08460b92d12ed361096ca1e980ab2a5f7c74eb79366c5007c",
+        "packer-plugin-git_v0.6.5_x5.0_windows_arm64.zip": "d70ade15728d26ba218ae2bdeb62cef227a9f392c624a42aab43db42e0741045"
+      }
+    }
+  ]
+}

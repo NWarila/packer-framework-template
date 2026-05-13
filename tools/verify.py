@@ -4,11 +4,15 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
+import shlex
 import subprocess
 import sys
 from collections.abc import Callable
 from pathlib import Path
+
+from ci._config import load_ci_config, select_case
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -64,6 +68,26 @@ def install(package: str) -> None:
     run([PYTHON, "-m", "pip", "install", "--no-cache-dir", package])
 
 
+def command_from_env(name: str, default: str) -> list[str]:
+    raw = os.environ.get(name)
+    if raw is None or raw.strip() == "":
+        return [default]
+
+    raw = raw.strip()
+    if raw.startswith("["):
+        parsed = json.loads(raw)
+        if not isinstance(parsed, list) or not all(
+            isinstance(item, str) and item for item in parsed
+        ):
+            raise SystemExit(f"{name} must be a JSON array of command strings.")
+        return parsed
+
+    if Path(raw).exists():
+        return [raw]
+
+    return shlex.split(raw, posix=os.name != "nt")
+
+
 def opa_policy() -> None:
     install("pyyaml==6.0.3")
     opa_input = capture([PYTHON, "tools/build_opa_input.py"])
@@ -83,16 +107,60 @@ def opa_policy() -> None:
     )
 
 
-def build_steps() -> dict[str, Step]:
+def opa_artifact(case: str) -> None:
+    run([PYTHON, "tools/ci/run_integration.py", "--case", case])
+    opa_input = capture([PYTHON, "tools/build_packer_artifact_input.py"])
+    run(
+        [
+            "opa",
+            "eval",
+            "--fail-defined",
+            "--format",
+            "pretty",
+            "--stdin-input",
+            "--data",
+            "policies/opa",
+            "data.packer_artifact.deny[_]",
+        ],
+        input_text=opa_input,
+    )
+
+
+def validate(case: str) -> None:
+    config = load_ci_config(ROOT)
+    try:
+        case_config = select_case(config, case)
+    except ValueError as exc:
+        raise SystemExit(str(exc)) from None
+    run(
+        [
+            "packer",
+            "validate",
+            "-var-file",
+            case_config["var_file"],
+            config.get("packer_root", "packer"),
+        ]
+    )
+
+
+def build_steps(case: str) -> dict[str, Step]:
+    shell_helpers = sorted(
+        path.relative_to(ROOT).as_posix() for path in (ROOT / "tools" / "ci").glob("*.sh")
+    )
+    bats_tests = sorted(
+        path.relative_to(ROOT).as_posix() for path in (ROOT / "tests" / "ci").glob("*.bats")
+    )
     return {
         "fmt": lambda: run(["packer", "fmt", "-recursive", "packer", "examples"]),
         "fmt-check": lambda: run(
             ["packer", "fmt", "-check", "-recursive", "packer", "examples"]
         ),
         "init": lambda: run(["packer", "init", "packer"]),
-        "validate": lambda: run(
-            ["packer", "validate", "-var-file=examples/linux/reference-linux.pkrvars.hcl", "packer"]
+        "plugin-provenance": lambda: run([PYTHON, "tools/check_packer_plugin_provenance.py"]),
+        "plugin-install-check": lambda: run(
+            [PYTHON, "tools/check_packer_plugin_provenance.py", "--installed"]
         ),
+        "validate": lambda: validate(case),
         "inspect": lambda: run(["packer", "inspect", "packer"]),
         "ruff": lambda: (
             install("ruff==0.13.0"),
@@ -102,22 +170,45 @@ def build_steps() -> dict[str, Step]:
             install("yamllint==1.35.1"),
             run([PYTHON, "-m", "yamllint", "-d", YAMLLINT_CONFIG, ".github/workflows/"]),
         ),
+        "test": lambda: (
+            run([PYTHON, "tools/test_render_reference_build.py"]),
+            run([PYTHON, "tools/test_packer_variable_validation.py"]),
+        ),
+        "workflow-helper-tests": lambda: (
+            run([*command_from_env("SHELLCHECK", "shellcheck"), *shell_helpers]),
+            run([PYTHON, "tools/ci/check_workflow_run_inputs.py", ".github/workflows"]),
+            run([*command_from_env("BATS", "bats"), *bats_tests]),
+        ),
         "opa-test": lambda: run(["opa", "test", "policies/opa"]),
         "opa-policy": opa_policy,
-        "manifest-check": lambda: run([PYTHON, "tools/check_baseline_manifest.py"]),
+        "opa-artifact": lambda: opa_artifact(case),
+        "manifest-check": lambda: run(
+            [PYTHON, "tools/check_baseline_manifest.py", "--check-present-sources"]
+        ),
+        "docs": lambda: run([PYTHON, "tools/gen_packer_docs.py"]),
+        "docs-diff": lambda: run([PYTHON, "tools/gen_packer_docs.py", "--check"]),
         "docs-layout": lambda: run([PYTHON, "tools/check_docs_layout.py"]),
         "adr-schema": lambda: run([PYTHON, "tools/check_adr_schema.py"]),
         "integration": lambda: run(
-            ["packer", "build", "-force", "-var-file=examples/linux/reference-linux.pkrvars.hcl", "packer"]
+            [PYTHON, "tools/ci/run_integration.py", "--case", case]
         ),
     }
 
 
 TARGETS: dict[str, tuple[str, ...]] = {
-    "lint": ("fmt-check", "init", "validate", "inspect", "ruff", "yamllint"),
-    "policy": ("opa-test", "opa-policy"),
-    "docs-check": ("docs-layout", "adr-schema"),
-    "ci": ("lint", "policy", "docs-check", "manifest-check"),
+    "lint": (
+        "fmt-check",
+        "init",
+        "plugin-provenance",
+        "plugin-install-check",
+        "validate",
+        "inspect",
+        "ruff",
+        "yamllint",
+    ),
+    "policy": ("opa-test", "opa-policy", "opa-artifact"),
+    "docs-check": ("docs-diff", "docs-layout", "adr-schema"),
+    "ci": ("lint", "test", "workflow-helper-tests", "policy", "docs-check", "manifest-check"),
     "verify": ("ci", "integration"),
 }
 
@@ -131,13 +222,17 @@ def execute(name: str, steps: dict[str, Step]) -> None:
 
 
 def main() -> int:
-    steps = build_steps()
-    choices = sorted(set(TARGETS) | set(steps))
+    choices = sorted(set(TARGETS) | set(build_steps("reference-linux")))
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("target", nargs="?", default="verify", choices=choices)
+    parser.add_argument(
+        "--case",
+        default="reference-linux",
+        help="Case to run for case-aware targets.",
+    )
     args = parser.parse_args()
 
-    execute(args.target, steps)
+    execute(args.target, build_steps(args.case))
     return 0
 
 

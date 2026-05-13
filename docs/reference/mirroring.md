@@ -6,11 +6,11 @@ This template is intentionally split into shared repo-quality baseline and Packe
 
 Derivative Packer frameworks should mirror the files listed under `byte_identical` in [`baseline-manifest.json`](../../baseline-manifest.json). That set is the stable scaffold: repository hygiene, docs layout checks, security callers, Packer-oriented Renovate rules, universal OPA policy, and the Python verification entrypoint.
 
-The manifest is intentionally narrower than a full repo copy. It does not require downstream frameworks to keep the reference `null` source or the starter examples byte-identical.
+The manifest is intentionally narrower than a full repo copy. It does not require downstream frameworks to keep the reference `file` source or the starter examples byte-identical.
 
 ## Framework-Owned Layer
 
-The `packer/` implementation, examples, provider choices, and repo-tier ADRs are allowed to diverge. This reference uses the `null` builder so the pattern is visible without infrastructure; real frameworks replace that source with provider-specific builders while preserving the same validation interface.
+The `packer/` implementation, examples, provider choices, and repo-tier ADRs are allowed to diverge. This reference uses the `file` builder so the pattern is visible without infrastructure while still consuming rendered installer content; real frameworks replace that source with provider-specific builders while preserving the same validation interface.
 
 ## Optional Release Layer
 
@@ -21,7 +21,7 @@ Push-triggered release-please is opt-in through `RELEASE_PLEASE_ON_PUSH=true` be
 ## New Framework Checklist
 
 1. Rewrite `README.md` for the real framework.
-2. Replace the `null` source under `packer/`.
+2. Replace the `file` source under `packer/`.
 3. Update examples for supported guest OS families.
 4. Add provider-specific threat model notes under `docs/explanation/`.
 5. Decide whether to keep the optional release layer.

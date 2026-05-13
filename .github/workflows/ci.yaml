@@ -35,6 +35,27 @@ jobs:
           fail_level: error
           reporter: github-check
 
+  workflow-helper-tests:
+    name: workflow helper tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Install Bats and ShellCheck
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y bats shellcheck
+      - name: ShellCheck workflow helpers
+        run: shellcheck tools/ci/*.sh
+      - name: Check workflow run-block input binding
+        run: python tools/ci/check_workflow_run_inputs.py .github/workflows
+      - name: Bats workflow helper tests
+        run: bats tests/ci/*.bats
+
   markdownlint:
     name: markdownlint
     runs-on: ubuntu-latest
@@ -82,5 +103,45 @@ jobs:
           chmod +x /usr/local/bin/opa
           opa version
 
+      - name: Install Bats and ShellCheck
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y bats shellcheck
+
       - name: Verify
         run: python tools/verify.py verify
+
+  windows-path-checks:
+    name: packer verify / windows path checks
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install Packer
+        # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
+        shell: pwsh
+        env:
+          PACKER_VERSION: "1.15.0"
+        run: |
+          $ErrorActionPreference = "Stop"
+          $zip = Join-Path $env:RUNNER_TEMP "packer.zip"
+          $dest = Join-Path $env:RUNNER_TEMP "packer"
+          Invoke-WebRequest `
+            -Uri "https://releases.hashicorp.com/packer/$env:PACKER_VERSION/packer_$($env:PACKER_VERSION)_windows_amd64.zip" `
+            -OutFile $zip
+          Expand-Archive -Path $zip -DestinationPath $dest -Force
+          Add-Content -Path $env:GITHUB_PATH -Value $dest
+          & (Join-Path $dest "packer.exe") version
+
+      - name: Verify path-sensitive cases
+        shell: pwsh
+        run: |
+          python tools/verify.py init
+          python tools/verify.py plugin-install-check
+          python tools/verify.py validate --case reference-windows
+          python tools/verify.py test

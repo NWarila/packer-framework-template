@@ -12,5 +12,6 @@ These invariants are enforced by CI, OPA, docs checks, or repository convention.
 | ADRs live under `docs/decision-records/{org,template,repo}/` and are indexed. | `tools/check_adr_schema.py` |
 | Documentation stays in the Diataxis layout. | `tools/check_docs_layout.py` |
 | Release evidence uses the same pinned Packer version as the framework. | `release.yaml` and `reusable-release-evidence.yaml` |
+| This template publishes framework evidence only; runner evidence and promotion workflows are out of scope. | `docs/explanation/architecture.md` and `reusable-release-evidence.yaml` |
 
 Derivative frameworks may supersede template-tier decisions with repo-tier ADRs, but they should treat any supersession as an explicit design choice rather than incidental drift.
