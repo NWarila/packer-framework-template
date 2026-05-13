@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 from pathlib import Path, PurePosixPath
 from typing import Any
+
+INVENTORY_ROOTS = ("tools", "tests", "policies", "fixtures")
+INVENTORY_WORKFLOW_GLOBS = ("reusable-*.yaml", "reusable-*.yml")
+SKIP_PARTS = {"__pycache__"}
+SKIP_SUFFIXES = {".pyc", ".pyo"}
 
 
 def fail(message: str) -> None:
@@ -44,7 +50,48 @@ def validate_entries(field: str, entries: Any, *, allow_empty: bool) -> tuple[li
     return sources, targets
 
 
+def inventory_file(path: Path) -> bool:
+    if not path.is_file():
+        return False
+    if any(part in SKIP_PARTS for part in path.parts):
+        return False
+    if path.suffix in SKIP_SUFFIXES:
+        return False
+    return True
+
+
+def present_source_inventory() -> list[str]:
+    paths: set[str] = set()
+    for root_name in INVENTORY_ROOTS:
+        root = Path(root_name)
+        if not root.is_dir():
+            continue
+        for path in root.rglob("*"):
+            if inventory_file(path):
+                paths.add(path.as_posix())
+
+    workflows = Path(".github") / "workflows"
+    if workflows.is_dir():
+        for pattern in INVENTORY_WORKFLOW_GLOBS:
+            for path in workflows.glob(pattern):
+                if inventory_file(path):
+                    paths.add(path.as_posix())
+
+    return sorted(paths)
+
+
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--check-present-sources",
+        action="store_true",
+        help=(
+            "fail when files under tools/, tests/, policies/, fixtures/, or "
+            ".github/workflows/reusable-* are not listed in the manifest"
+        ),
+    )
+    args = parser.parse_args()
+
     try:
         raw = json.loads(Path("baseline-manifest.json").read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
@@ -79,12 +126,30 @@ def main() -> None:
     missing = [source for source in sources if not Path(source).is_file()]
     if missing:
         fail(f"sources missing: {missing}")
+
+    listed_sources = set(sources)
+    template_adrs = sorted(
+        path.as_posix()
+        for path in (Path("docs") / "decision-records" / "template").glob("[0-9][0-9][0-9][0-9]-*.md")
+    )
+    unlisted_template_adrs = [path for path in template_adrs if path not in listed_sources]
+    if unlisted_template_adrs:
+        fail(f"template ADRs missing from baseline manifest: {unlisted_template_adrs}")
+
+    if args.check_present_sources:
+        present_sources = present_source_inventory()
+        unlisted_sources = [path for path in present_sources if path not in listed_sources]
+        if unlisted_sources:
+            fail(f"present source files missing from baseline manifest: {unlisted_sources}")
+
     print(
         f"manifest: version={raw['version']}, "
         f"byte_identical={len(byte_identical_sources)}, "
         f"scaffold_starter={len(scaffold_sources)}"
     )
     print("all sources resolve on disk")
+    if args.check_present_sources:
+        print("all present source inventory entries are listed")
 
 
 if __name__ == "__main__":
