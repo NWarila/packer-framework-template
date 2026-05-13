@@ -50,12 +50,32 @@
       "target": ".github/workflows/ci.yaml"
     },
     {
+      "source": ".github/workflows/drift-gate.yaml",
+      "target": ".github/workflows/drift-gate.yaml"
+    },
+    {
+      "source": ".github/workflows/reusable-auto-merge.yaml",
+      "target": ".github/workflows/reusable-auto-merge.yaml"
+    },
+    {
       "source": ".github/workflows/reusable-codeql.yaml",
       "target": ".github/workflows/reusable-codeql.yaml"
     },
     {
       "source": ".github/workflows/reusable-iac-security.yaml",
       "target": ".github/workflows/reusable-iac-security.yaml"
+    },
+    {
+      "source": ".github/workflows/reusable-packer-framework-build.yaml",
+      "target": ".github/workflows/reusable-packer-framework-build.yaml"
+    },
+    {
+      "source": ".github/workflows/reusable-release-evidence.yaml",
+      "target": ".github/workflows/reusable-release-evidence.yaml"
+    },
+    {
+      "source": ".github/workflows/reusable-release-please.yaml",
+      "target": ".github/workflows/reusable-release-please.yaml"
     },
     {
       "source": ".github/workflows/reusable-scorecard.yaml",
@@ -66,8 +86,20 @@
       "target": ".github/workflows/security.yaml"
     },
     {
+      "source": "docs/how-to/vendor-packer-plugins.md",
+      "target": "docs/how-to/vendor-packer-plugins.md"
+    },
+    {
       "source": "docs/reference/mirroring.md",
       "target": "docs/reference/mirroring.md"
+    },
+    {
+      "source": "docs/reference/release-gates.md",
+      "target": "docs/reference/release-gates.md"
+    },
+    {
+      "source": "docs/reference/runner-protocol.md",
+      "target": "docs/reference/runner-protocol.md"
     },
     {
       "source": "docs/decision-records/template/README.md",
@@ -82,8 +114,36 @@
       "target": "docs/decision-records/template/0002-keep-reference-framework-credential-free.md"
     },
     {
+      "source": "docs/decision-records/template/0004-isolate-pull-request-target-triggers.md",
+      "target": "docs/decision-records/template/0004-isolate-pull-request-target-triggers.md"
+    },
+    {
+      "source": "packer/fixtures/runtime/.gitkeep",
+      "target": "packer/fixtures/runtime/.gitkeep"
+    },
+    {
+      "source": "packer/fixtures/runtime/README.md",
+      "target": "packer/fixtures/runtime/README.md"
+    },
+    {
+      "source": "packer/repos/.gitkeep",
+      "target": "packer/repos/.gitkeep"
+    },
+    {
+      "source": "packer/repos/README.md",
+      "target": "packer/repos/README.md"
+    },
+    {
+      "source": "fixtures/integration/reference/README.md",
+      "target": "fixtures/integration/reference/README.md"
+    },
+    {
       "source": "tools/build_opa_input.py",
       "target": "tools/build_opa_input.py"
+    },
+    {
+      "source": "tools/build_packer_artifact_input.py",
+      "target": "tools/build_packer_artifact_input.py"
     },
     {
       "source": "tools/check_adr_schema.py",
@@ -98,8 +158,88 @@
       "target": "tools/check_docs_layout.py"
     },
     {
+      "source": "tools/check_packer_plugin_provenance.py",
+      "target": "tools/check_packer_plugin_provenance.py"
+    },
+    {
+      "source": "tools/gen_packer_docs.py",
+      "target": "tools/gen_packer_docs.py"
+    },
+    {
+      "source": "tools/render_reference_build.py",
+      "target": "tools/render_reference_build.py"
+    },
+    {
+      "source": "tools/test_packer_variable_validation.py",
+      "target": "tools/test_packer_variable_validation.py"
+    },
+    {
+      "source": "tools/test_render_reference_build.py",
+      "target": "tools/test_render_reference_build.py"
+    },
+    {
       "source": "tools/verify.py",
       "target": "tools/verify.py"
+    },
+    {
+      "source": "tools/ci/apply_overlay.sh",
+      "target": "tools/ci/apply_overlay.sh"
+    },
+    {
+      "source": "tools/ci/_config.py",
+      "target": "tools/ci/_config.py"
+    },
+    {
+      "source": "tools/ci/check_workflow_run_inputs.py",
+      "target": "tools/ci/check_workflow_run_inputs.py"
+    },
+    {
+      "source": "tools/ci/config.toml",
+      "target": "tools/ci/config.toml"
+    },
+    {
+      "source": "tools/ci/packer_var_file_args.sh",
+      "target": "tools/ci/packer_var_file_args.sh"
+    },
+    {
+      "source": "tools/ci/run_integration.py",
+      "target": "tools/ci/run_integration.py"
+    },
+    {
+      "source": "tools/ci/validate_framework_ref.sh",
+      "target": "tools/ci/validate_framework_ref.sh"
+    },
+    {
+      "source": "tools/ci/validate_input_ref.sh",
+      "target": "tools/ci/validate_input_ref.sh"
+    },
+    {
+      "source": "tests/ci/apply_overlay.bats",
+      "target": "tests/ci/apply_overlay.bats"
+    },
+    {
+      "source": "tests/ci/check_workflow_run_inputs.bats",
+      "target": "tests/ci/check_workflow_run_inputs.bats"
+    },
+    {
+      "source": "tests/ci/packer_var_file_args.bats",
+      "target": "tests/ci/packer_var_file_args.bats"
+    },
+    {
+      "source": "tests/ci/validate_framework_ref.bats",
+      "target": "tests/ci/validate_framework_ref.bats"
+    },
+    {
+      "source": "tests/ci/validate_input_ref.bats",
+      "target": "tests/ci/validate_input_ref.bats"
+    },
+    {
+      "source": "policies/opa/packer_artifact.rego",
+      "target": "policies/opa/packer_artifact.rego"
+    },
+    {
+      "source": "policies/opa/packer_artifact_test.rego",
+      "target": "policies/opa/packer_artifact_test.rego"
     },
     {
       "source": "policies/opa/repo_hygiene.rego",

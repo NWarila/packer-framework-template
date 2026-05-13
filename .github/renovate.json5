@@ -8,10 +8,10 @@
     "config:recommended",
     ":dependencyDashboard",
     ":semanticCommits",
-    ":semanticCommitTypeAll(chore)",
-    "schedule:weekly"
+    ":semanticCommitTypeAll(chore)"
   ],
 
+  "schedule": ["before 6am on monday"],
   "labels": ["dependencies"],
   "prConcurrentLimit": 5,
   "minimumReleaseAge": "7 days",
@@ -56,6 +56,21 @@
       "datasourceTemplate": "github-releases",
       "matchStrings": [
         "source\\s*=\\s*\"(?<depName>github\\.com/[^\"]+)\"\\s+version\\s*=\\s*\"=\\s*(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)\""
+      ]
+    },
+    {
+      // Track SHA body inputs that must move with reusable workflow pins and
+      // drift-gate baseline refs. Renovate's git-refs datasource treats the
+      // branch name as currentValue and the checked-in 40-char SHA as
+      // currentDigest.
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.*\\.ya?ml$/"
+      ],
+      "datasourceTemplate": "git-refs",
+      "versioningTemplate": "loose",
+      "matchStrings": [
+        "# renovate: depName=(?<depName>[^\\s]+) packageName=(?<packageName>[^\\s]+) currentValue=(?<currentValue>[^\\s]+)\\s+(?:template_ref|framework_ref|source-ref):\\s*(?<currentDigest>[0-9a-f]{40})"
       ]
     }
   ],
