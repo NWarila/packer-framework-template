@@ -9,7 +9,7 @@ images = {
     tags         = ["reference", "linux", "ci"]
 
     install_template = {
-      template_path = "../examples/linux/cloud-init.pkrtpl.hcl"
+      template_path = "examples/linux/cloud-init.pkrtpl.hcl"
       output_file   = "user-data"
       vars = {
         hostname = "reference-linux"
