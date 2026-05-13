@@ -1,14 +1,28 @@
 name: Reusable Release Evidence
 
+# Generates and attaches a uniform evidence bundle to every release in
+# framework, runner, and template repositories that consume this Packer
+# template family.
+#
+# Type-aware behavior:
+# - framework: runs Packer fmt/init/validate/inspect, plugin provenance,
+#   artifact OPA policy, docs layout, and reference snapshots.
+# - runner: captures packer/repos inventory and the pinned framework_ref used
+#   by the runner workflow. It does not install or run Packer.
+# - template: runner-shaped evidence for the seed runner template.
+
 on:
   workflow_call:
     inputs:
       packer_version:
-        description: Exact Packer version used for framework evidence.
+        description: |
+          Exact Packer version used for framework evidence. Runner and
+          template repos ignore this input.
         required: true
         type: string
       repo_type:
-        description: "Explicit repo type for release evidence: framework, runner, or template."
+        description: |
+          Explicit repo type for release evidence: framework, runner, or template.
         required: true
         type: string
 
@@ -40,17 +54,20 @@ jobs:
           REPO_TYPE: ${{ inputs.repo_type }}
         run: |
           set -euo pipefail
-          case "${REPO_TYPE}" in
+          t="${REPO_TYPE}"
+          case "$t" in
             framework|runner|template) ;;
             *)
-              echo "::error::unknown repo type '${REPO_TYPE}'"
+              echo "::error::unknown repo type '$t' (expected framework, runner, or template)"
               exit 1
               ;;
           esac
-          echo "type=${REPO_TYPE}" >> "$GITHUB_OUTPUT"
+          echo "type=$t" >> "$GITHUB_OUTPUT"
+          echo "repo type: $t"
 
       - name: Install Packer
         if: steps.type.outputs.type == 'framework'
+        # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
         env:
           PACKER_VERSION: ${{ inputs.packer_version }}
         run: |
@@ -60,6 +77,18 @@ jobs:
           unzip -q /tmp/packer.zip -d /tmp/packer
           install -m 0755 /tmp/packer/packer /usr/local/bin/packer
           packer version
+
+      - name: Install OPA
+        if: steps.type.outputs.type == 'framework'
+        # renovate: datasource=github-releases depName=open-policy-agent/opa
+        env:
+          OPA_VERSION: "1.10.0"
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /usr/local/bin/opa \
+            "https://openpolicyagent.org/downloads/v${OPA_VERSION}/opa_linux_amd64_static"
+          chmod +x /usr/local/bin/opa
+          opa version
 
       - name: Setup Python
         if: steps.type.outputs.type == 'framework'
@@ -73,7 +102,7 @@ jobs:
           OUT: release-evidence
         run: |
           set -euo pipefail
-          mkdir -p "$OUT"/{logs,docs,reference}
+          mkdir -p "$OUT"/{logs,validate,inspect,plugins,docs,reference,policy}
           : > "$OUT/.gate-results.tsv"
 
           record() {
@@ -92,10 +121,37 @@ jobs:
             record "packer init" fail "logs/packer-init.txt"
           fi
 
-          if packer validate -var-file=examples/linux/reference-linux.pkrvars.hcl packer > "$OUT/logs/packer-validate.txt" 2>&1; then
-            record "packer validate" pass "logs/packer-validate.txt"
+          if python3 tools/check_packer_plugin_provenance.py --installed --upstream --evidence "$OUT/plugins/packer-plugin-provenance.json" > "$OUT/plugins/packer-plugin-provenance.txt" 2>&1; then
+            record "packer plugin provenance" pass "plugins/packer-plugin-provenance.json"
           else
-            record "packer validate" fail "logs/packer-validate.txt"
+            record "packer plugin provenance" fail "plugins/packer-plugin-provenance.txt"
+          fi
+
+          if [ -f packer/plugin-provenance.json ]; then
+            cp packer/plugin-provenance.json "$OUT/plugins/plugin-provenance.lock.json"
+          fi
+
+          if packer validate -machine-readable -var-file examples/linux/reference-linux.pkrvars.hcl packer > "$OUT/validate/packer.validate.tsv" 2> "$OUT/logs/packer-validate.stderr.txt"; then
+            record "packer validate" pass "validate/packer.validate.tsv"
+          else
+            record "packer validate" fail "validate/packer.validate.tsv"
+          fi
+
+          if packer inspect -machine-readable packer > "$OUT/inspect/packer.inspect.tsv" 2> "$OUT/logs/packer-inspect.stderr.txt"; then
+            record "packer inspect" pass "inspect/packer.inspect.tsv"
+          else
+            record "packer inspect" fail "inspect/packer.inspect.tsv"
+          fi
+
+          if python3 tools/verify.py opa-artifact > "$OUT/policy/opa-artifact.txt" 2>&1; then
+            record "opa artifact" pass "policy/opa-artifact.txt"
+          else
+            record "opa artifact" fail "policy/opa-artifact.txt"
+            {
+              echo "## opa-artifact failure"
+              echo ""
+              sed 's/^/    /' "$OUT/policy/opa-artifact.txt"
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
 
           if [ -f tools/check_docs_layout.py ]; then
@@ -109,6 +165,53 @@ jobs:
           if [ -f docs/reference/packer.md ]; then
             cp docs/reference/packer.md "$OUT/reference/packer.md"
             record "packer reference" pass "reference/packer.md"
+          fi
+
+          {
+            echo "release_sha=${GITHUB_SHA}"
+            echo "release_ref=${GITHUB_REF}"
+            echo "repository=${GITHUB_REPOSITORY}"
+            echo "run_id=${GITHUB_RUN_ID}"
+          } > "$OUT/metadata.txt"
+
+      - name: Generate runner/template evidence
+        if: steps.type.outputs.type == 'runner' || steps.type.outputs.type == 'template'
+        env:
+          OUT: release-evidence
+          REPO_TYPE: ${{ steps.type.outputs.type }}
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT"/{packer/repos,packer/fixtures,workflows}
+          echo "${REPO_TYPE}" > "$OUT/repo-type.txt"
+
+          if [ -d packer/repos ]; then
+            (cd packer/repos && find . -type f | sort) > "$OUT/packer/repos/inventory.txt"
+            tar -C packer/repos -czf "$OUT/packer/repos/snapshot.tar.gz" .
+          else
+            echo "packer/repos missing" > "$OUT/packer/repos/inventory.txt"
+          fi
+
+          if [ -d packer/fixtures/runtime ]; then
+            (cd packer/fixtures/runtime && find . -type f | sort) > "$OUT/packer/fixtures/runtime-inventory.txt"
+          else
+            echo "packer/fixtures/runtime missing" > "$OUT/packer/fixtures/runtime-inventory.txt"
+          fi
+
+          workflow_files=()
+          if [ -d .github/workflows ]; then
+            while IFS= read -r -d '' file; do
+              workflow_files+=( "$file" )
+            done < <(find .github/workflows -maxdepth 1 -type f \( -name '*.yaml' -o -name '*.yml' \) -print0)
+          fi
+
+          if ((${#workflow_files[@]})); then
+            grep -EH '^\s*framework_ref:\s*[0-9a-f]{40}(\s*(#.*)?)?$' "${workflow_files[@]}" \
+              > "$OUT/workflows/framework-ref.txt" || echo "no pinned framework_ref found" > "$OUT/workflows/framework-ref.txt"
+            grep -EH 'reusable-packer-framework-build\.yaml@[0-9a-f]{40}' "${workflow_files[@]}" \
+              > "$OUT/workflows/framework-workflow-pin.txt" || echo "no reusable framework workflow pin found" > "$OUT/workflows/framework-workflow-pin.txt"
+          else
+            echo "no workflow files found" > "$OUT/workflows/framework-ref.txt"
+            echo "no workflow files found" > "$OUT/workflows/framework-workflow-pin.txt"
           fi
 
           {
@@ -136,6 +239,17 @@ jobs:
               echo "| $gate | $result | \`$evidence\` |"
             done < "$OUT/.gate-results.tsv"
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail failed framework evidence gates
+        if: steps.type.outputs.type == 'framework'
+        env:
+          OUT: release-evidence
+        run: |
+          set -euo pipefail
+          if grep -q $'\tfail\t' "$OUT/.gate-results.tsv"; then
+            cat "$OUT/.gate-results.tsv"
+            exit 1
+          fi
 
       - name: Bundle evidence
         run: tar -czf release-evidence.tar.gz release-evidence/

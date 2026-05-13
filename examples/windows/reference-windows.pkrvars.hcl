@@ -9,7 +9,7 @@ images = {
     tags         = ["reference", "windows", "ci"]
 
     install_template = {
-      template_path = "../examples/windows/autounattend.pkrtpl.hcl"
+      template_path = "examples/windows/autounattend.pkrtpl.hcl"
       output_file   = "Autounattend.xml"
       vars = {
         hostname = "ref-win-2022"

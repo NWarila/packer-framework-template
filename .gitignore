@@ -26,10 +26,12 @@
 !/.github/workflows/
 !/.github/workflows/auto-merge.yaml
 !/.github/workflows/ci.yaml
+!/.github/workflows/drift-gate.yaml
 !/.github/workflows/release.yaml
 !/.github/workflows/reusable-auto-merge.yaml
 !/.github/workflows/reusable-codeql.yaml
 !/.github/workflows/reusable-iac-security.yaml
+!/.github/workflows/reusable-packer-framework-build.yaml
 !/.github/workflows/reusable-release-evidence.yaml
 !/.github/workflows/reusable-release-please.yaml
 !/.github/workflows/reusable-scorecard.yaml
@@ -42,12 +44,14 @@
 !/docs/how-to/
 !/docs/how-to/.gitkeep
 !/docs/how-to/develop-this-module.md
+!/docs/how-to/vendor-packer-plugins.md
 !/docs/reference/
 !/docs/reference/.gitkeep
 !/docs/reference/invariants.md
 !/docs/reference/mirroring.md
 !/docs/reference/packer.md
 !/docs/reference/release-gates.md
+!/docs/reference/runner-protocol.md
 !/docs/explanation/
 !/docs/explanation/.gitkeep
 !/docs/explanation/architecture.md
@@ -61,6 +65,7 @@
 !/docs/decision-records/org/0002-adopt-diataxis-documentation-framework.md
 !/docs/decision-records/org/0003-use-deny-all-gitignore-strategy.md
 !/docs/decision-records/org/0004-use-renovate-for-dependency-updates.md
+!/docs/decision-records/org/0005-pin-terraform-and-provider-versions-exactly.md
 !/docs/decision-records/template/
 !/docs/decision-records/template/.gitkeep
 !/docs/decision-records/template/README.md
@@ -72,6 +77,7 @@
 
 !/packer/
 !/packer/packer.pkr.hcl
+!/packer/plugin-provenance.json
 !/packer/variables.pkr.hcl
 !/packer/data.pkr.hcl
 !/packer/locals.pkr.hcl
@@ -79,8 +85,15 @@
 !/packer/builds.pkr.hcl
 !/packer/artifacts/
 !/packer/artifacts/.gitkeep
+!/packer/fixtures/
+!/packer/fixtures/runtime/
+!/packer/fixtures/runtime/.gitkeep
+!/packer/fixtures/runtime/README.md
 !/packer/manifests/
 !/packer/manifests/.gitkeep
+!/packer/repos/
+!/packer/repos/.gitkeep
+!/packer/repos/README.md
 
 !/examples/
 !/examples/linux/
@@ -89,17 +102,47 @@
 !/examples/windows/
 !/examples/windows/autounattend.pkrtpl.hcl
 !/examples/windows/reference-windows.pkrvars.hcl
+!/examples/multi-image/
+!/examples/multi-image/reference-multi.pkrvars.hcl
+
+!/fixtures/
+!/fixtures/integration/
+!/fixtures/integration/reference/
+!/fixtures/integration/reference/README.md
 
 !/policies/
 !/policies/opa/
+!/policies/opa/packer_artifact.rego
+!/policies/opa/packer_artifact_test.rego
 !/policies/opa/repo_hygiene.rego
 !/policies/opa/repo_hygiene_test.rego
 
 !/tools/
+!/tools/render_reference_build.py
+!/tools/test_packer_variable_validation.py
+!/tools/test_render_reference_build.py
+!/tools/gen_packer_docs.py
+!/tools/build_packer_artifact_input.py
 !/tools/build_opa_input.py
+!/tools/check_packer_plugin_provenance.py
 !/tools/check_adr_schema.py
 !/tools/check_baseline_manifest.py
 !/tools/check_docs_layout.py
 !/tools/verify.py
 !/tools/ci/
+!/tools/ci/_config.py
 !/tools/ci/config.toml
+!/tools/ci/apply_overlay.sh
+!/tools/ci/check_workflow_run_inputs.py
+!/tools/ci/packer_var_file_args.sh
+!/tools/ci/run_integration.py
+!/tools/ci/validate_framework_ref.sh
+!/tools/ci/validate_input_ref.sh
+
+!/tests/
+!/tests/ci/
+!/tests/ci/apply_overlay.bats
+!/tests/ci/check_workflow_run_inputs.bats
+!/tests/ci/packer_var_file_args.bats
+!/tests/ci/validate_framework_ref.bats
+!/tests/ci/validate_input_ref.bats

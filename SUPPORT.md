@@ -17,4 +17,4 @@ This is a personal project maintained by one person. Responses may take time. Pu
 
 ## How this policy is used
 
-This support policy is provided centrally from the [NWarila/.github](https://github.com/NWarila/.github) repository and may be overridden by a repository-specific `SUPPORT.md`. If your question is about a specific repository's code, prefer that repository's own support channels when they exist.
+This support policy is provided centrally from the [NWarila/.github](https://github.com/NWarila/.github) repository. Repositories that adopt the org drift-gated baseline keep this file byte-identical with the central copy; repository-specific support details belong in that repository's Diataxis docs. If your question is about a specific repository's code, prefer that repository's own support channels when they exist.

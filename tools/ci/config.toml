@@ -7,4 +7,25 @@ packer_root = "packer"
 name = "reference-linux"
 var_file = "examples/linux/reference-linux.pkrvars.hcl"
 install_template = "examples/linux/cloud-init.pkrtpl.hcl"
+expected_image_key = "reference-linux"
+expected_output_file = "user-data"
+expected_content = ["#cloud-config", "lock_passwd: true"]
+build = true
+
+[[cases]]
+name = "reference-windows"
+var_file = "examples/windows/reference-windows.pkrvars.hcl"
+install_template = "examples/windows/autounattend.pkrtpl.hcl"
+expected_image_key = "reference-windows"
+expected_output_file = "Autounattend.xml"
+expected_content = ["<unattend", "Microsoft-Windows-Shell-Setup"]
+build = true
+
+[[cases]]
+name = "reference-multi"
+var_file = "examples/multi-image/reference-multi.pkrvars.hcl"
+install_template = "examples/windows/autounattend.pkrtpl.hcl"
+expected_image_key = "reference-windows"
+expected_output_file = "Autounattend.xml"
+expected_content = ["<unattend", "ref-win-2022"]
 build = true

@@ -9,10 +9,11 @@
 ## Change Workflow
 
 1. Edit the Packer framework files under `packer/`.
-2. Keep example consumer inputs in `examples/` aligned with the variable contract.
+2. Keep example framework inputs in `examples/` aligned with the variable contract.
 3. Update docs and ADRs when the framework contract changes.
 4. Run `python tools/verify.py ci` for fast feedback.
 5. Run `python tools/verify.py integration` when you need the credential-free build smoke test.
 6. Run `python tools/verify.py verify` before opening a PR.
+7. Run `make clean` before committing to remove generated local evidence.
 
 Generated files under `packer/artifacts/` and `packer/manifests/` are evidence from local runs. Do not commit them unless a future ADR deliberately changes that policy.

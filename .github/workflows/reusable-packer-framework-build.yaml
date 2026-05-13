@@ -1,0 +1,265 @@
+name: Reusable Packer Framework Build
+
+# Reusable workflow for framework-derived repositories that want to validate
+# or build this framework contract with caller-supplied image inputs.
+#
+# This is not a Packer runner template. It does not define runner repository
+# layout, scheduling, promotion, environment approval, or provider-specific
+# publication. Those belong in the repository that operates the framework.
+#
+# The workflow:
+#
+#   1. Validates framework_ref and input_ref before any checkout.
+#   2. Checks out this framework at framework_ref (a 40-char SHA).
+#   3. Checks out an optional input repository at input_ref.
+#   4. Applies overlay_paths, constrained to packer/repos/ and
+#      packer/fixtures/runtime/.
+#   5. Installs the pinned Packer CLI version.
+#   6. Runs packer init, validate, inspect, and optionally build.
+#   7. Uploads generated artifacts/manifests when requested.
+
+on:
+  workflow_call:
+    inputs:
+      framework_ref:
+        description: |
+          40-character commit SHA of this framework
+          (NWarila/packer-framework-template) to check out.
+        required: true
+        type: string
+      input_repo:
+        description: |
+          owner/repo that supplies framework input files. Defaults to the
+          caller via github.repository when omitted. This is not a runner
+          contract; it is only an input source for this framework workflow.
+        required: false
+        type: string
+        default: ""
+      input_ref:
+        description: |
+          Git ref of the input repository to check out. Defaults to github.sha
+          (the SHA of the calling workflow's commit). Must be a 40-character
+          commit SHA unless allow_floating_input_ref is true.
+        required: false
+        type: string
+        default: ""
+      allow_floating_input_ref:
+        description: |
+          Emergency escape hatch for callers that intentionally need a floating
+          input_ref. Keep false for runner-template inventory inputs.
+        required: false
+        type: boolean
+        default: false
+      overlay_paths:
+        description: |
+          Newline-separated `<input-src>=><framework-dst>` entries.
+          Paths must be relative and must not contain `..` traversal
+          segments. Destinations must stay under `packer/repos/` or
+          `packer/fixtures/runtime/`.
+        required: false
+        type: string
+        default: ""
+      packer_version:
+        description: Exact Packer CLI version to install.
+        required: false
+        type: string
+        default: "1.15.0"
+      var_file:
+        description: |
+          Optional newline-separated paths within the input checkout to Packer
+          var files. Absolute paths and `..` traversal segments are rejected.
+        required: false
+        type: string
+        default: ""
+      build:
+        description: Run `packer build` after validate/inspect.
+        required: false
+        type: boolean
+        default: false
+      upload_artifacts:
+        description: Upload generated packer/artifacts and packer/manifests.
+        required: false
+        type: boolean
+        default: false
+
+    outputs:
+      build_status:
+        description: '"validated" | "built"'
+        value: ${{ jobs.framework_build.outputs.build_status }}
+
+permissions:
+  contents: read
+
+jobs:
+  framework_build:
+    name: framework-template / packer framework build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      build_status: ${{ steps.status.outputs.build_status }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Resolve input-ref / input-repo defaults
+        id: refs
+        env:
+          OVERRIDE_REPO: ${{ inputs.input_repo }}
+          OVERRIDE_REF: ${{ inputs.input_ref }}
+          FALLBACK_REPO: ${{ github.repository }}
+          FALLBACK_REF: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          repo="${OVERRIDE_REPO:-$FALLBACK_REPO}"
+          ref="${OVERRIDE_REF:-$FALLBACK_REF}"
+          echo "input_repo=${repo}" >> "${GITHUB_OUTPUT}"
+          echo "input_ref=${ref}" >> "${GITHUB_OUTPUT}"
+
+      - name: Validate refs before checkout
+        env:
+          FRAMEWORK_REF: ${{ inputs.framework_ref }}
+          INPUT_REF: ${{ steps.refs.outputs.input_ref }}
+          ALLOW_FLOATING_INPUT_REF: ${{ inputs.allow_floating_input_ref }}
+        run: |
+          set -euo pipefail
+          if [[ ! "${FRAMEWORK_REF}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::framework_ref must be a 40-character SHA, got '${FRAMEWORK_REF}'" >&2
+            exit 1
+          fi
+          case "${ALLOW_FLOATING_INPUT_REF}" in
+            true|false) ;;
+            *)
+              echo "::error::allow_floating_input_ref must be true or false, got '${ALLOW_FLOATING_INPUT_REF}'" >&2
+              exit 1
+              ;;
+          esac
+          if [[ "${ALLOW_FLOATING_INPUT_REF}" != "true" && ! "${INPUT_REF}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::input_ref must be a 40-character SHA, got '${INPUT_REF}'" >&2
+            exit 1
+          fi
+          if [[ "${ALLOW_FLOATING_INPUT_REF}" == "true" ]]; then
+            echo "::warning::allow_floating_input_ref=true; input checkout is not SHA-pinned."
+          fi
+
+      - name: Check out framework at framework_ref
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: NWarila/packer-framework-template
+          ref: ${{ inputs.framework_ref }}
+          path: framework
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Verify ref helper scripts
+        env:
+          FRAMEWORK_REF: ${{ inputs.framework_ref }}
+          INPUT_REF: ${{ steps.refs.outputs.input_ref }}
+          ALLOW_FLOATING_INPUT_REF: ${{ inputs.allow_floating_input_ref }}
+        run: |
+          set -euo pipefail
+          bash framework/tools/ci/validate_framework_ref.sh "${FRAMEWORK_REF}"
+          bash framework/tools/ci/validate_input_ref.sh "${INPUT_REF}" "${ALLOW_FLOATING_INPUT_REF}"
+
+      - name: Check out input repo at input_ref
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          repository: ${{ steps.refs.outputs.input_repo }}
+          ref: ${{ steps.refs.outputs.input_ref }}
+          path: input
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Apply overlay (input to framework)
+        if: ${{ inputs.overlay_paths != '' }}
+        env:
+          OVERLAY_PATHS: ${{ inputs.overlay_paths }}
+        run: |
+          set -euo pipefail
+          bash framework/tools/ci/apply_overlay.sh input framework "${OVERLAY_PATHS}"
+
+      - name: Install Packer
+        # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
+        env:
+          PACKER_VERSION: ${{ inputs.packer_version }}
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/packer.zip \
+            "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
+          unzip -q /tmp/packer.zip -d /tmp/packer
+          install -m 0755 /tmp/packer/packer /usr/local/bin/packer
+          packer version
+
+      - name: Resolve var-file argument
+        id: varfile
+        env:
+          VAR_FILE: ${{ inputs.var_file }}
+        run: |
+          set -euo pipefail
+          {
+            echo "args<<PACKER_VAR_ARGS"
+            bash framework/tools/ci/packer_var_file_args.sh "${VAR_FILE}"
+            echo "PACKER_VAR_ARGS"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: packer init
+        working-directory: framework
+        run: packer init packer
+
+      - name: packer validate
+        working-directory: framework
+        env:
+          VAR_FILE_ARGS: ${{ steps.varfile.outputs.args }}
+        run: |
+          set -euo pipefail
+          args=( validate )
+          if [ -n "${VAR_FILE_ARGS}" ]; then
+            while IFS= read -r arg; do
+              args+=( "${arg}" )
+            done <<< "${VAR_FILE_ARGS}"
+          fi
+          args+=( packer )
+          packer "${args[@]}"
+
+      - name: packer inspect
+        working-directory: framework
+        run: packer inspect packer
+
+      - name: packer build
+        if: ${{ inputs.build }}
+        working-directory: framework
+        env:
+          VAR_FILE_ARGS: ${{ steps.varfile.outputs.args }}
+        run: |
+          set -euo pipefail
+          args=( build -force )
+          if [ -n "${VAR_FILE_ARGS}" ]; then
+            while IFS= read -r arg; do
+              args+=( "${arg}" )
+            done <<< "${VAR_FILE_ARGS}"
+          fi
+          args+=( packer )
+          packer "${args[@]}"
+
+      - name: Record build status
+        id: status
+        env:
+          BUILD_ENABLED: ${{ inputs.build }}
+        run: |
+          set -euo pipefail
+          if [ "${BUILD_ENABLED}" = "true" ]; then
+            echo "build_status=built" >> "${GITHUB_OUTPUT}"
+          else
+            echo "build_status=validated" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Upload generated Packer evidence
+        if: ${{ always() && inputs.upload_artifacts }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: packer-evidence-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            framework/packer/artifacts/**
+            framework/packer/manifests/**
+          if-no-files-found: warn
+          retention-days: 14

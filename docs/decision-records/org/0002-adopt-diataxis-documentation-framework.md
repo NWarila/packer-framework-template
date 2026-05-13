@@ -13,7 +13,7 @@
 
 ## TL;DR
 
-We will use the [Diátaxis](https://diataxis.fr) documentation framework for all non-ADR documentation in repositories that adopt this baseline. Each adopting repository organizes long-form documentation into the four Diátaxis quadrants — **tutorials**, **how-to guides**, **reference**, and **explanation** — under a `docs/` directory whose immediate subdirectories mirror those quadrant names. ADRs themselves remain governed by [ADR-0001](0001-use-architecture-decision-records.md) and live in their own subtree at `docs/decision-records/{org,template,repo}/` (org-mirrored or repository-specific). This gives every repository a consistent, reader-first information architecture that is easy to navigate, easy to maintain, and easy for new contributors to understand.
+We will use the [Diátaxis](https://diataxis.fr) documentation framework for all non-ADR documentation in repositories that adopt this baseline. Each adopting repository organizes long-form documentation into the four Diátaxis quadrants — **tutorials**, **how-to guides**, **reference**, and **explanation** — under a `docs/` directory whose immediate subdirectories mirror those quadrant names. ADRs themselves remain governed by [ADR-0001](0001-use-architecture-decision-records.md) and live in their own subtree at `docs/decision-records/{org,template,repo}/` (org-mirrored, template-mirrored, or repository-specific). This gives every repository a consistent, reader-first information architecture that is easy to navigate, easy to maintain, and easy for new contributors to understand.
 
 ## Context and Problem Statement
 
