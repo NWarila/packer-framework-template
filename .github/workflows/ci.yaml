@@ -71,21 +71,16 @@ jobs:
           globs: "**/*.md"
 
   packer-ci:
-    name: packer verify (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+    name: packer verify
+    runs-on: ubuntu-latest
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Install Packer (Linux)
-        if: matrix.os == 'ubuntu-latest'
+      - name: Install Packer
         # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
         env:
           PACKER_VERSION: "1.15.0"
@@ -97,8 +92,37 @@ jobs:
           install -m 0755 /tmp/packer/packer /usr/local/bin/packer
           packer version
 
-      - name: Install Packer (Windows)
-        if: matrix.os == 'windows-latest'
+      - name: Install OPA
+        # renovate: datasource=github-releases depName=open-policy-agent/opa
+        env:
+          OPA_VERSION: "1.10.0"
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /usr/local/bin/opa \
+            "https://openpolicyagent.org/downloads/v${OPA_VERSION}/opa_linux_amd64_static"
+          chmod +x /usr/local/bin/opa
+          opa version
+
+      - name: Install Bats and ShellCheck
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y bats shellcheck
+
+      - name: Verify
+        run: python tools/verify.py verify
+
+  windows-path-checks:
+    name: packer verify / windows path checks
+    runs-on: windows-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Install Packer
         # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
         shell: pwsh
         env:
@@ -114,31 +138,7 @@ jobs:
           Add-Content -Path $env:GITHUB_PATH -Value $dest
           & (Join-Path $dest "packer.exe") version
 
-      - name: Install OPA
-        if: matrix.os == 'ubuntu-latest'
-        # renovate: datasource=github-releases depName=open-policy-agent/opa
-        env:
-          OPA_VERSION: "1.10.0"
-        run: |
-          set -euo pipefail
-          curl -fsSL -o /usr/local/bin/opa \
-            "https://openpolicyagent.org/downloads/v${OPA_VERSION}/opa_linux_amd64_static"
-          chmod +x /usr/local/bin/opa
-          opa version
-
-      - name: Install Bats and ShellCheck
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y bats shellcheck
-
-      - name: Verify (Linux full)
-        if: matrix.os == 'ubuntu-latest'
-        run: python tools/verify.py verify
-
-      - name: Verify (Windows path-sensitive tests)
-        if: matrix.os == 'windows-latest'
+      - name: Verify path-sensitive cases
         shell: pwsh
         run: |
           python tools/verify.py init
