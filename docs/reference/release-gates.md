@@ -1,15 +1,20 @@
 # Release Gates
 
-Release candidates must pass:
+PRs to `main` on this template must pass:
 
-- `python tools/verify.py ci`
-- `python tools/verify.py integration`
-- `python tools/verify.py workflow-helper-tests`
-- `python tools/verify.py opa-artifact`
-- `python tools/verify.py plugin-install-check`
-- `python tools/check_packer_plugin_provenance.py --upstream` in release evidence
-- security workflow
-- release evidence workflow when publishing a versioned release
+- `actionlint` (workflow syntax)
+- `workflow helper tests` (ShellCheck, workflow input binding checks, and Bats coverage for workflow helpers)
+- `markdownlint` (docs)
+- `packer verify` (`python tools/verify.py verify`, including Packer validation, plugin install checks, OPA policy tests, docs, manifest, and integration)
+- `packer verify / windows path checks` (Windows path-sensitive Packer validation)
+- `org-baseline / verify` (drift-gate against `NWarila/.github` at pinned source-ref)
+- `Trivy (filesystem & secrets)`, `Gitleaks (secret scan)`, `zizmor (Actions security)` (security)
+- `CodeQL` (`security.yaml`)
+- `OpenSSF Scorecard` (`security.yaml`)
+
+Release candidates must also pass release evidence, including
+`python tools/check_packer_plugin_provenance.py --upstream`, before publishing
+a versioned release.
 
 Push-triggered release-please is opt-in. Set the repository variable
 `RELEASE_PLEASE_ON_PUSH=true` only after the repo is allowed to let GitHub
