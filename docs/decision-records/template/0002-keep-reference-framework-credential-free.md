@@ -13,7 +13,7 @@
 
 ## TL;DR
 
-The reference framework uses Packer's `null` source and local evidence output so CI can validate the framework contract without infrastructure credentials.
+The reference framework uses Packer's `file` source and local evidence output so CI can validate the framework contract without infrastructure credentials.
 
 ## Context and Problem Statement
 
@@ -28,22 +28,22 @@ A template repository should be runnable by any consumer and by CI without ownin
 
 ## Considered Options
 
-1. Use the `null` source and generated local evidence.
+1. Use the `file` source and generated local evidence.
 2. Use a real Proxmox source.
 3. Mock Packer with scripts only.
 
 ## Decision Outcome
 
-Chosen option: **Option 1, `null` source and local evidence.**
+Chosen option: **Option 1, `file` source and local evidence.**
 
 Real frameworks replace the source block while keeping the surrounding repo-quality surface.
 
 ## Pros and Cons of the Options
 
-### Option 1: `null` source and local evidence
+### Option 1: `file` source and local evidence
 
 - Good, because validation requires no external systems.
-- Good, because Packer still parses and runs the real template.
+- Good, because Packer still parses and runs the real template and consumes the rendered installer artifact.
 - Bad, because it does not prove provider-specific image publishing.
 
 ### Option 2: Real provider source
@@ -58,7 +58,7 @@ Real frameworks replace the source block while keeping the surrounding repo-qual
 
 ## Confirmation
 
-1. `packer/source.pkr.hcl` uses `source "null"`.
+1. `packer/source.pkr.hcl` uses `source "file"`.
 2. `python tools/verify.py integration` runs without provider credentials.
 3. Generated artifacts remain untracked.
 
@@ -92,7 +92,8 @@ None (current).
 
 ## Implementing PRs
 
-Initial template implementation.
+- Initial template implementation: credential-free reference source and generated local evidence.
+- Adversarial-review catch-up: replaced the `null` source with the `file` source so rendered installer content is consumed by Packer, while keeping the framework credential-free.
 
 ## Related ADRs
 

@@ -1,31 +1,31 @@
 <!--
   ==============================================================================
   ADR-0001 is the inaugural Architecture Decision Record for the
-  nwarila-platform organization. It serves three purposes simultaneously:
+  NWarila organization. It serves three purposes simultaneously:
 
     1. The authoritative DECISION that ADRs are the documentation format
-       used by the nwarila-platform organization for architecturally
+       used by the NWarila organization for architecturally
        significant choices.
-    2. The canonical TEMPLATE that subsequent ADRs (org-baseline and
-       repository-specific alike) are copied from.
+    2. The canonical TEMPLATE that subsequent ADRs (org-baseline,
+       type-template, and repository-specific alike) are copied from.
     3. The worked EXAMPLE that demonstrates a strong ADR in practice.
 
   Where ADRs live (per ADR-0001 §"Decision Outcome"):
 
-    * Org-baseline ADRs: master copy in nwarila-platform/.github at
+    * Org-baseline ADRs: master copy in NWarila/.github at
       docs/decision-records/NNNN-short-kebab-title.md; byte-identical
       mirror in every adopting child repository at
       docs/decision-records/org/NNNN-short-kebab-title.md.
-    * Type-template ADRs: master copy in the consumer's type-template
-      repository (for example NWarila/terraform-runner-template) at
-      docs/decision-records/NNNN-short-kebab-title.md; byte-identical
-      mirror in every consumer of that template at
+    * Type-template ADRs: master copy in the type-template repository
+      (for example NWarila/terraform-runner-template) at
+      docs/decision-records/template/NNNN-short-kebab-title.md;
+      byte-identical mirror in every consumer of that template at
       docs/decision-records/template/NNNN-short-kebab-title.md.
     * Repository-specific ADRs: live only in their owning repository at
       docs/decision-records/repo/NNNN-short-kebab-title.md. Numbering
       namespace is independent of the org and template namespaces.
 
-  How to author a new org-baseline ADR (in this nwarila-platform/.github
+  How to author a new org-baseline ADR (in this NWarila/.github
   repository):
 
     1. Copy this file to a new file at
@@ -53,7 +53,7 @@
   How to author a new type-template ADR (in a type-template repository
   such as NWarila/terraform-runner-template): follow the same steps,
   but author the ADR in the type-template repository's
-  docs/decision-records/ directory, and on merge mirror it into every
+  docs/decision-records/template/ directory, and on merge mirror it into every
   consumer of that template's docs/decision-records/template/
   directory (sync PRs per consumer). The numbering namespace for
   template ADRs is per-template and independent of the org namespace.
@@ -81,13 +81,13 @@
 
 ## TL;DR
 
-We will use `docs/decision-records/` as the conventional home for architecturally significant decisions across the `nwarila-platform` organization. ADRs are organized into three scopes: **org-baseline** ADRs whose master copies live in this `nwarila-platform/.github` repository at `docs/decision-records/` and are mirrored into every adopting child repository at `docs/decision-records/org/`; **type-template** ADRs whose master copies live in a type-template repository (for example `NWarila/terraform-runner-template` for Terraform consumers) at `docs/decision-records/` and are mirrored into every consumer of that template at `docs/decision-records/template/`; and **repository-specific** ADRs that live only in their owning repository at `docs/decision-records/repo/`. The format is MADR 4.0-aligned but uses a visible Markdown metadata table, adds explicit reversibility, implementing-PR links, and a conservative compliance-notes crosswalk, and uses the more readable `decision-records` directory name in place of MADR's conventional `adr/`. This gives the organization a single source of truth for org-level governance that travels alongside the code in every adopting repository, a per-stack source of truth that travels alongside every consumer of a given type-template, and a place for each repository to record its own architectural choices without conflicting with either shared baseline.
+We will use `docs/decision-records/` as the conventional home for architecturally significant decisions across the `NWarila` organization. ADRs are organized into three scopes: **org-baseline** ADRs whose master copies live in this `NWarila/.github` repository at `docs/decision-records/` and are mirrored into every adopting child repository at `docs/decision-records/org/`; **type-template** ADRs whose master copies live in a type-template repository (for example `NWarila/terraform-runner-template` for Terraform consumers) at `docs/decision-records/template/` and are mirrored into every consumer of that template at `docs/decision-records/template/`; and **repository-specific** ADRs that live only in their owning repository at `docs/decision-records/repo/`. The format is MADR 4.0-aligned but uses a visible Markdown metadata table, adds explicit reversibility, implementing-PR links, and a conservative compliance-notes crosswalk, and uses the more readable `decision-records` directory name in place of MADR's conventional `adr/`. This gives the organization a single source of truth for org-level governance that travels alongside the code in every adopting repository, a per-stack source of truth that travels alongside every consumer of a given type-template, and a place for each repository to record its own architectural choices without conflicting with either shared baseline.
 
 ## Context and Problem Statement
 
 Every nontrivial repository accumulates architectural choices. Why is authentication handled one way and not another? Why was one platform or workflow chosen over another? Why does CI enforce one supply-chain posture instead of a weaker one? A year later, the code can still show *what* exists, but it rarely explains *why* it exists.
 
-This `nwarila-platform/.github` repository is the canonical home for org-level governance artifacts. ADRs that establish org-wide conventions (this one, the documentation framework, the source-control hygiene policy, etc.) are authored here and replicated into every adopting child repository. In addition to the org baseline, each repository may inherit decisions from a **type-template** — a per-stack template repository (for example `NWarila/terraform-runner-template` for Terraform consumers, or `NWarila/secure-packer-bootstrapper` for Packer consumers) whose ADRs apply to every consumer of that stack but not to consumers of other stacks. Type-template ADRs cover decisions that are too specific for the org baseline (because they only matter to that stack) but too widely applicable for any single repository (because they recur across every consumer of the template). Repositories that participate inherit the org baseline by syncing the mirrored copies into their own `docs/decision-records/org/` directory, mirror their type-template's decisions into `docs/decision-records/template/`, and may add their own repository-scoped ADRs at `docs/decision-records/repo/` for decisions that affect only that repository.
+This `NWarila/.github` repository is the canonical home for org-level governance artifacts. ADRs that establish org-wide conventions (this one, the documentation framework, the source-control hygiene policy, etc.) are authored here and replicated into every adopting child repository. In addition to the org baseline, each repository may inherit decisions from a **type-template** — a per-stack template repository (for example `NWarila/terraform-runner-template` for Terraform consumers, or `NWarila/packer-framework-template` for Packer consumers) whose ADRs apply to every consumer of that stack but not to consumers of other stacks. Type-template ADRs cover decisions that are too specific for the org baseline (because they only matter to that stack) but too widely applicable for any single repository (because they recur across every consumer of the template). Repositories that participate inherit the org baseline by syncing the mirrored copies into their own `docs/decision-records/org/` directory, mirror their type-template's decisions into `docs/decision-records/template/`, and may add their own repository-scoped ADRs at `docs/decision-records/repo/` for decisions that affect only that repository.
 
 Three audiences matter here:
 
@@ -127,9 +127,9 @@ Chosen option: **Option 5, a MADR 4.0-aligned Markdown template with small portf
 
 ADRs are organized into three scopes with independent four-digit numbering namespaces:
 
-- **Org-baseline ADRs** capture decisions that apply to the entire `nwarila-platform` organization, regardless of stack. Their master copies live in this `nwarila-platform/.github` repository at `docs/decision-records/NNNN-short-kebab-title.md`. Every adopting child repository mirrors them at `docs/decision-records/org/NNNN-short-kebab-title.md` (identical content, copied byte-for-byte from the master). Numbers in the org namespace are allocated monotonically and never reused.
+- **Org-baseline ADRs** capture decisions that apply to the entire `NWarila` organization, regardless of stack. Their master copies live in this `NWarila/.github` repository at `docs/decision-records/NNNN-short-kebab-title.md`. Every adopting child repository mirrors them at `docs/decision-records/org/NNNN-short-kebab-title.md` (identical content, copied byte-for-byte from the master). Numbers in the org namespace are allocated monotonically and never reused.
 
-- **Type-template ADRs** capture decisions that apply to every repository derived from a particular type-template — for example, every Terraform consumer derived from `NWarila/terraform-runner-template`, or every Packer consumer derived from `NWarila/secure-packer-bootstrapper`. They are the right home for decisions that are too stack-specific for the org baseline (because they only matter to that stack) and too widely applicable for any single repository (because they recur across every consumer of the template). Their master copies live in the type-template at `docs/decision-records/NNNN-short-kebab-title.md`. Every consumer of that template mirrors them at `docs/decision-records/template/NNNN-short-kebab-title.md` (identical content, copied byte-for-byte from the master). Numbers in a type-template's namespace are allocated monotonically per template and are independent of the org namespace and of every other type-template's namespace.
+- **Type-template ADRs** capture decisions that apply to every repository derived from a particular type-template — for example, every Terraform consumer derived from `NWarila/terraform-runner-template`, or every Packer consumer derived from `NWarila/packer-framework-template`. They are the right home for decisions that are too stack-specific for the org baseline (because they only matter to that stack) and too widely applicable for any single repository (because they recur across every consumer of the template). Their master copies live in the type-template at `docs/decision-records/template/NNNN-short-kebab-title.md`. Every consumer of that template mirrors them at `docs/decision-records/template/NNNN-short-kebab-title.md` (identical content, copied byte-for-byte from the master). Numbers in a type-template's namespace are allocated monotonically per template and are independent of the org namespace and of every other type-template's namespace.
 
 - **Repository-specific ADRs** capture decisions that apply only to one repository. They live in that repository at `docs/decision-records/repo/NNNN-short-kebab-title.md` and are not mirrored to any other repository, to the org `.github` repo, or to any type-template. Numbers in a repository's `repo` namespace are independent of the org and template namespaces; the same number can appear in `org/`, `template/`, and `repo/` without conflict because they are in different directories.
 
@@ -199,10 +199,10 @@ This ADR is the canonical example for this baseline and the starting point for p
 
 Adherence to this ADR is confirmed by the following mechanisms. The wording `MUST`, `SHOULD`, and `MAY` follows [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) conventions.
 
-1. **Org-baseline mirror check.** A child repository that adopts this baseline MUST contain `docs/decision-records/org/` populated with byte-identical copies of every accepted org-baseline ADR from `nwarila-platform/.github/docs/decision-records/`. A CI job or `pre-commit` hook MAY fail a pull request that adds an `org/` file that does not match the master, removes a master that still exists upstream, or omits a master that has been added upstream.
-2. **Type-template mirror check.** A child repository derived from a type-template MUST contain `docs/decision-records/template/` populated with byte-identical copies of every accepted type-template ADR from that template's `docs/decision-records/`. The same CI mechanism that enforces the org-baseline mirror SHOULD enforce the template-baseline mirror, run once per type-template the repository derives from.
+1. **Org-baseline mirror check.** A child repository that adopts this baseline MUST contain `docs/decision-records/org/` populated with byte-identical copies of every accepted org-baseline ADR from `NWarila/.github/docs/decision-records/`. A CI job or `pre-commit` hook MAY fail a pull request that adds an `org/` file that does not match the master, removes a master that still exists upstream, or omits a master that has been added upstream.
+2. **Type-template mirror check.** A child repository derived from a type-template MUST contain `docs/decision-records/template/` populated with byte-identical copies of every accepted type-template ADR from that template's `docs/decision-records/template/`. The same CI mechanism that enforces the org-baseline mirror SHOULD enforce the template-baseline mirror, run once per type-template the repository derives from.
 3. **Layout-skeleton check.** Every adopting child repository MUST contain a complete decision-records directory skeleton — `docs/decision-records/org/`, `docs/decision-records/template/`, and `docs/decision-records/repo/` — even when some scopes contain no ADRs yet. Empty scopes are kept in source control via byte-identical `.gitkeep` placeholders mirrored from the org canonical, so a reader scanning any repo immediately sees the same predictable layout regardless of which scopes are populated. *Content* in each scope remains opt-in per scope (a repo with no repository-specific decisions has an empty `repo/`; a repo that does not derive from a type-template has an empty `template/`); only the *layout* is mandatory.
-4. **Repo-scope check.** Repository-specific ADRs MUST live at `docs/decision-records/repo/NNNN-short-kebab-title.md`. They MUST NOT appear in `docs/decision-records/org/` or `docs/decision-records/template/`, and MUST NOT be promoted to either namespace without first being authored as a new ADR in `nwarila-platform/.github` (for the org baseline) or in the appropriate type-template (for a template baseline). A CI script MAY assert this directory split.
+4. **Repo-scope check.** Repository-specific ADRs MUST live at `docs/decision-records/repo/NNNN-short-kebab-title.md`. They MUST NOT appear in `docs/decision-records/org/` or `docs/decision-records/template/`, and MUST NOT be promoted to either namespace without first being authored as a new ADR in `NWarila/.github` (for the org baseline) or in the appropriate type-template (for a template baseline). A CI script MAY assert this directory split.
 5. **Schema check.** A CI script SHOULD verify that every file matching `docs/decision-records/{org,template,repo}/[0-9][0-9][0-9][0-9]-*.md` contains the required section headings from this template: `## TL;DR`, `## Context and Problem Statement`, `## Decision Drivers`, `## Considered Options`, `## Decision Outcome`, `## Pros and Cons of the Options`, `## Confirmation`, `## Consequences`, `## Assumptions`, `## Supersedes`, `## Superseded by`, `## Implementing PRs`, `## Related ADRs`, and `## Compliance Notes`. `## Considered Options` and `## Pros and Cons of the Options` are especially important because they preserve rejected alternatives and trade-offs.
 6. **Index check.** A repository that has any ADRs MUST contain `docs/decision-records/README.md` listing every ADR (org-mirrored, template-mirrored, and repo-specific, in clearly separated sections) with its current Status and Summary. A CI script SHOULD diff the directory listing against the index and fail on drift.
 7. **Human review.** Every pull request that introduces a new ADR MUST be reviewed. Every pull request that materially contradicts an Accepted ADR SHOULD either update the code to comply, supersede the ADR, or explain why the ADR never actually applied to the change in question.

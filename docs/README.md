@@ -7,4 +7,4 @@ This repo follows the Diataxis documentation layout:
 - `explanation/` - architecture, testing strategy, and threat model.
 - `decision-records/` - org, template, and repo ADRs.
 
-The reference Packer framework lives under [`../packer/`](../packer/), with consumer examples under [`../examples/`](../examples/).
+The reference Packer framework lives under [`../packer/`](../packer/), with example framework inputs under [`../examples/`](../examples/).
