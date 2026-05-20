@@ -60,7 +60,14 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
-        # SARIF upload (built into the analyze step) requires GitHub Advanced
-        # Security on private repos. Don't fail the job if the upload itself
-        # fails — analysis findings remain visible in the run log.
+        with:
+          upload: never
+          output: codeql-results
+
+      - name: Upload CodeQL SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
+        # Best-effort publishing: GitHub Security SARIF upload can be
+        # unavailable on private repos, but the analysis above remains the gate.
         continue-on-error: true
+        with:
+          sarif_file: codeql-results
