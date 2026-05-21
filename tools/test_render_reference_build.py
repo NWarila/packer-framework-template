@@ -106,6 +106,47 @@ def test_rejects_quote_in_path(repo_root: Path) -> None:
     assert_failure(result, "contains a quote or line break")
 
 
+def test_golden_minimal_render(repo_root: Path) -> None:
+    """Snapshot test: rendered files must byte-match committed golden fixtures.
+
+    Regression detector for the renderer's path-resolution and write path.
+    If the renderer behavior legitimately changes, regenerate the golden
+    files in tests/fixtures/render-golden/minimal/expected/ and re-commit.
+    """
+    fixture_root = ROOT / "tests" / "fixtures" / "render-golden" / "minimal"
+    request_template = json.loads((fixture_root / "request.json").read_text(encoding="utf-8"))
+    expected_dir = fixture_root / "expected"
+
+    repo_str = str(repo_root)
+
+    def substitute(value: Any) -> Any:
+        if isinstance(value, str):
+            return value.replace("__REPO_ROOT__", repo_str)
+        if isinstance(value, list):
+            return [substitute(v) for v in value]
+        if isinstance(value, dict):
+            return {k: substitute(v) for k, v in value.items()}
+        return value
+
+    payload = substitute(request_template)
+    result = run_helper(payload, cwd=repo_root)
+    assert_success(result)
+
+    for expected_file in sorted(expected_dir.rglob("*")):
+        if expected_file.is_dir():
+            continue
+        rel = expected_file.relative_to(expected_dir)
+        actual = repo_root / "packer" / "artifacts" / "reference-minimal" / rel
+        if not actual.is_file():
+            raise AssertionError(f"golden file missing in rendered output: {rel}")
+        if actual.read_bytes() != expected_file.read_bytes():
+            raise AssertionError(
+                f"golden mismatch for {rel}: "
+                f"rendered {len(actual.read_bytes())} bytes != "
+                f"expected {len(expected_file.read_bytes())} bytes"
+            )
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         tmp_root = Path(tmp).resolve()
@@ -114,6 +155,9 @@ def main() -> int:
         test_writes_requested_files(repo_root)
         test_rejects_paths_outside_repo(repo_root, tmp_root)
         test_rejects_quote_in_path(repo_root)
+    with tempfile.TemporaryDirectory() as tmp:
+        repo_root = Path(tmp).resolve()
+        test_golden_minimal_render(repo_root)
     print("render_reference_build.py tests passed")
     return 0
 

@@ -1,0 +1,3 @@
+#cloud-config
+# rendered fixture: minimal
+hostname: example-builder

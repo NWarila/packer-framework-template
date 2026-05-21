@@ -165,3 +165,11 @@
 !/tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/
 !/tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/caller.yaml
 !/tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/reusable-pwn.yaml
+
+# Renderer golden fixtures (Implementation Phase 4)
+!/tests/fixtures/render-golden/
+!/tests/fixtures/render-golden/minimal/
+!/tests/fixtures/render-golden/minimal/request.json
+!/tests/fixtures/render-golden/minimal/expected/
+!/tests/fixtures/render-golden/minimal/expected/user-data
+!/tests/fixtures/render-golden/minimal/expected/build-context.json
