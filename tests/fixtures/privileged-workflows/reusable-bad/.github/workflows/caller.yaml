@@ -1,0 +1,16 @@
+name: Reusable-Bad Caller
+
+# Fixture: pull_request_target caller that delegates to a reusable workflow
+# that *does* check out PR head. The transitive reach must be detected.
+
+on:
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  delegate:
+    uses: ./.github/workflows/reusable-pwn.yaml

@@ -87,6 +87,16 @@ is_acceptable(ref) if is_docker_digest(ref)
 
 # region ------ [ Helpers ] ---------------------------------------------------------------- #
 
+raw_line_records(path) := records if {
+	content := input.files[path]
+	raw_lines := split(content, "\n")
+	records := [{"line": idx + 1, "text": text, "trimmed": trim_space(text)} |
+		some idx
+		text := raw_lines[idx]
+		text != ""
+	]
+}
+
 uncommented_lines(path) := lines if {
 	content := input.files[path]
 	lines := [trim_space(line) |
@@ -111,6 +121,12 @@ uncommented_line_records(path) := records if {
 }
 
 workflow_file(path) if startswith(path, ".github/workflows/")
+
+packer_hcl_files contains path if {
+	some path, _ in input.files
+	startswith(path, "packer/")
+	endswith(path, ".pkr.hcl")
+}
 
 has_pull_request_target_trigger(path) if {
 	workflow_file(path)
@@ -176,6 +192,27 @@ plugin_provenance_covers(required) if {
 has_exact_packer_required_version if {
 	line := uncommented_lines("packer/packer.pkr.hcl")[_]
 	regex.match(exact_packer_required_version_re, line)
+}
+
+packer_data_blocks contains block if {
+	path := packer_hcl_files[_]
+	record := raw_line_records(path)[_]
+	not startswith(record.trimmed, "#")
+	not startswith(record.trimmed, "//")
+	regex.match(`^data\s+"[^"]+"\s+"[^"]+"\s*\{`, record.trimmed)
+	block := {
+		"path": path,
+		"line": record.line,
+		"text": record.trimmed,
+	}
+}
+
+datasource_ok_at_validate(path, line_no) if {
+	record := raw_line_records(path)[_]
+	# raw_line_records skips blank lines, so this means same or previous non-empty line.
+	record.line <= line_no
+	record.line >= line_no - 1
+	contains(lower(record.text), "datasource: ok-at-validate")
 }
 
 # endregion --- [ Helpers ] ---------------------------------------------------------------- #
@@ -255,6 +292,15 @@ deny contains msg if {
 	regex.match(plugin_version_line_re, line)
 	not regex.match(exact_plugin_version_line_re, line)
 	msg := sprintf("packer/packer.pkr.hcl plugin version must use exact `= X.Y.Z` pin: %s", [line])
+}
+
+deny contains msg if {
+	block := packer_data_blocks[_]
+	not datasource_ok_at_validate(block.path, block.line)
+	msg := sprintf(
+		"%s:%d - Packer data sources require `# datasource: ok-at-validate` before validate-safe can run: %s",
+		[block.path, block.line, block.text],
+	)
 }
 
 # endregion --- [ Deny rules: packer/packer.pkr.hcl content ] ------------------------------ #
