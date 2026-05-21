@@ -148,6 +148,7 @@
 !/tests/ci/validate_input_ref.bats
 
 # Renderer golden fixtures (Codex Phase 4)
+!/tests/fixtures/
 !/tests/fixtures/render-golden/
 !/tests/fixtures/render-golden/minimal/
 !/tests/fixtures/render-golden/minimal/request.json
