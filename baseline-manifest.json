@@ -10,30 +10,6 @@
       "target": ".gitattributes"
     },
     {
-      "source": ".gitignore",
-      "target": ".gitignore"
-    },
-    {
-      "source": ".markdownlint-cli2.jsonc",
-      "target": ".markdownlint-cli2.jsonc"
-    },
-    {
-      "source": ".pre-commit-config.yaml",
-      "target": ".pre-commit-config.yaml"
-    },
-    {
-      "source": "LICENSE",
-      "target": "LICENSE"
-    },
-    {
-      "source": "Makefile",
-      "target": "Makefile"
-    },
-    {
-      "source": "baseline-manifest.json",
-      "target": "baseline-manifest.json"
-    },
-    {
       "source": ".github/CODEOWNERS",
       "target": ".github/CODEOWNERS"
     },
@@ -86,6 +62,46 @@
       "target": ".github/workflows/security.yaml"
     },
     {
+      "source": ".gitignore",
+      "target": ".gitignore"
+    },
+    {
+      "source": ".markdownlint-cli2.jsonc",
+      "target": ".markdownlint-cli2.jsonc"
+    },
+    {
+      "source": ".pre-commit-config.yaml",
+      "target": ".pre-commit-config.yaml"
+    },
+    {
+      "source": "LICENSE",
+      "target": "LICENSE"
+    },
+    {
+      "source": "Makefile",
+      "target": "Makefile"
+    },
+    {
+      "source": "baseline-manifest.json",
+      "target": "baseline-manifest.json"
+    },
+    {
+      "source": "docs/decision-records/template/0001-pin-packer-and-plugin-versions-exactly.md",
+      "target": "docs/decision-records/template/0001-pin-packer-and-plugin-versions-exactly.md"
+    },
+    {
+      "source": "docs/decision-records/template/0002-keep-reference-framework-credential-free.md",
+      "target": "docs/decision-records/template/0002-keep-reference-framework-credential-free.md"
+    },
+    {
+      "source": "docs/decision-records/template/0004-isolate-pull-request-target-triggers.md",
+      "target": "docs/decision-records/template/0004-isolate-pull-request-target-triggers.md"
+    },
+    {
+      "source": "docs/decision-records/template/README.md",
+      "target": "docs/decision-records/template/README.md"
+    },
+    {
       "source": "docs/how-to/vendor-packer-plugins.md",
       "target": "docs/how-to/vendor-packer-plugins.md"
     },
@@ -106,20 +122,8 @@
       "target": "docs/reference/runner-protocol.md"
     },
     {
-      "source": "docs/decision-records/template/README.md",
-      "target": "docs/decision-records/template/README.md"
-    },
-    {
-      "source": "docs/decision-records/template/0001-pin-packer-and-plugin-versions-exactly.md",
-      "target": "docs/decision-records/template/0001-pin-packer-and-plugin-versions-exactly.md"
-    },
-    {
-      "source": "docs/decision-records/template/0002-keep-reference-framework-credential-free.md",
-      "target": "docs/decision-records/template/0002-keep-reference-framework-credential-free.md"
-    },
-    {
-      "source": "docs/decision-records/template/0004-isolate-pull-request-target-triggers.md",
-      "target": "docs/decision-records/template/0004-isolate-pull-request-target-triggers.md"
+      "source": "fixtures/integration/reference/README.md",
+      "target": "fixtures/integration/reference/README.md"
     },
     {
       "source": "packer/fixtures/runtime/.gitkeep",
@@ -138,96 +142,20 @@
       "target": "packer/repos/README.md"
     },
     {
-      "source": "fixtures/integration/reference/README.md",
-      "target": "fixtures/integration/reference/README.md"
+      "source": "policies/opa/packer_artifact.rego",
+      "target": "policies/opa/packer_artifact.rego"
     },
     {
-      "source": "tools/build_opa_input.py",
-      "target": "tools/build_opa_input.py"
+      "source": "policies/opa/packer_artifact_test.rego",
+      "target": "policies/opa/packer_artifact_test.rego"
     },
     {
-      "source": "tools/build_packer_artifact_input.py",
-      "target": "tools/build_packer_artifact_input.py"
+      "source": "policies/opa/repo_hygiene.rego",
+      "target": "policies/opa/repo_hygiene.rego"
     },
     {
-      "source": "tools/check_adr_schema.py",
-      "target": "tools/check_adr_schema.py"
-    },
-    {
-      "source": "tools/check_baseline_manifest.py",
-      "target": "tools/check_baseline_manifest.py"
-    },
-    {
-      "source": "tools/check_docs_layout.py",
-      "target": "tools/check_docs_layout.py"
-    },
-    {
-      "source": "tools/check_packer_plugin_provenance.py",
-      "target": "tools/check_packer_plugin_provenance.py"
-    },
-    {
-      "source": "tools/check_privileged_workflows.py",
-      "target": "tools/check_privileged_workflows.py"
-    },
-    {
-      "source": "tools/gen_packer_docs.py",
-      "target": "tools/gen_packer_docs.py"
-    },
-    {
-      "source": "tools/install_ci_tools.sh",
-      "target": "tools/install_ci_tools.sh"
-    },
-    {
-      "source": "tools/render_reference_build.py",
-      "target": "tools/render_reference_build.py"
-    },
-    {
-      "source": "tools/run_privileged_workflow_tests.py",
-      "target": "tools/run_privileged_workflow_tests.py"
-    },
-    {
-      "source": "tools/test_packer_variable_validation.py",
-      "target": "tools/test_packer_variable_validation.py"
-    },
-    {
-      "source": "tools/test_render_reference_build.py",
-      "target": "tools/test_render_reference_build.py"
-    },
-    {
-      "source": "tools/verify.py",
-      "target": "tools/verify.py"
-    },
-    {
-      "source": "tools/ci/apply_overlay.sh",
-      "target": "tools/ci/apply_overlay.sh"
-    },
-    {
-      "source": "tools/ci/_config.py",
-      "target": "tools/ci/_config.py"
-    },
-    {
-      "source": "tools/ci/check_workflow_run_inputs.py",
-      "target": "tools/ci/check_workflow_run_inputs.py"
-    },
-    {
-      "source": "tools/ci/config.toml",
-      "target": "tools/ci/config.toml"
-    },
-    {
-      "source": "tools/ci/packer_var_file_args.sh",
-      "target": "tools/ci/packer_var_file_args.sh"
-    },
-    {
-      "source": "tools/ci/run_integration.py",
-      "target": "tools/ci/run_integration.py"
-    },
-    {
-      "source": "tools/ci/validate_framework_ref.sh",
-      "target": "tools/ci/validate_framework_ref.sh"
-    },
-    {
-      "source": "tools/ci/validate_input_ref.sh",
-      "target": "tools/ci/validate_input_ref.sh"
+      "source": "policies/opa/repo_hygiene_test.rego",
+      "target": "policies/opa/repo_hygiene_test.rego"
     },
     {
       "source": "tests/ci/apply_overlay.bats",
@@ -266,20 +194,104 @@
       "target": "tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/reusable-pwn.yaml"
     },
     {
-      "source": "policies/opa/packer_artifact.rego",
-      "target": "policies/opa/packer_artifact.rego"
+      "source": "tests/fixtures/render-golden/minimal/expected/build-context.json",
+      "target": "tests/fixtures/render-golden/minimal/expected/build-context.json"
     },
     {
-      "source": "policies/opa/packer_artifact_test.rego",
-      "target": "policies/opa/packer_artifact_test.rego"
+      "source": "tests/fixtures/render-golden/minimal/expected/user-data",
+      "target": "tests/fixtures/render-golden/minimal/expected/user-data"
     },
     {
-      "source": "policies/opa/repo_hygiene.rego",
-      "target": "policies/opa/repo_hygiene.rego"
+      "source": "tests/fixtures/render-golden/minimal/request.json",
+      "target": "tests/fixtures/render-golden/minimal/request.json"
     },
     {
-      "source": "policies/opa/repo_hygiene_test.rego",
-      "target": "policies/opa/repo_hygiene_test.rego"
+      "source": "tools/build_opa_input.py",
+      "target": "tools/build_opa_input.py"
+    },
+    {
+      "source": "tools/build_packer_artifact_input.py",
+      "target": "tools/build_packer_artifact_input.py"
+    },
+    {
+      "source": "tools/check_adr_schema.py",
+      "target": "tools/check_adr_schema.py"
+    },
+    {
+      "source": "tools/check_baseline_manifest.py",
+      "target": "tools/check_baseline_manifest.py"
+    },
+    {
+      "source": "tools/check_docs_layout.py",
+      "target": "tools/check_docs_layout.py"
+    },
+    {
+      "source": "tools/check_packer_plugin_provenance.py",
+      "target": "tools/check_packer_plugin_provenance.py"
+    },
+    {
+      "source": "tools/check_privileged_workflows.py",
+      "target": "tools/check_privileged_workflows.py"
+    },
+    {
+      "source": "tools/ci/_config.py",
+      "target": "tools/ci/_config.py"
+    },
+    {
+      "source": "tools/ci/apply_overlay.sh",
+      "target": "tools/ci/apply_overlay.sh"
+    },
+    {
+      "source": "tools/ci/check_workflow_run_inputs.py",
+      "target": "tools/ci/check_workflow_run_inputs.py"
+    },
+    {
+      "source": "tools/ci/config.toml",
+      "target": "tools/ci/config.toml"
+    },
+    {
+      "source": "tools/ci/packer_var_file_args.sh",
+      "target": "tools/ci/packer_var_file_args.sh"
+    },
+    {
+      "source": "tools/ci/run_integration.py",
+      "target": "tools/ci/run_integration.py"
+    },
+    {
+      "source": "tools/ci/validate_framework_ref.sh",
+      "target": "tools/ci/validate_framework_ref.sh"
+    },
+    {
+      "source": "tools/ci/validate_input_ref.sh",
+      "target": "tools/ci/validate_input_ref.sh"
+    },
+    {
+      "source": "tools/gen_packer_docs.py",
+      "target": "tools/gen_packer_docs.py"
+    },
+    {
+      "source": "tools/install_ci_tools.sh",
+      "target": "tools/install_ci_tools.sh"
+    },
+    {
+      "source": "tools/render_reference_build.py",
+      "target": "tools/render_reference_build.py"
+    },
+    {
+      "source": "tools/run_privileged_workflow_tests.py",
+      "target": "tools/run_privileged_workflow_tests.py"
+    },
+    {
+      "source": "tools/test_packer_variable_validation.py",
+      "target": "tools/test_packer_variable_validation.py"
+    },
+    {
+      "source": "tools/test_render_reference_build.py",
+      "target": "tools/test_render_reference_build.py"
+    },
+    {
+      "source": "tools/verify.py",
+      "target": "tools/verify.py"
     }
   ],
   "scaffold_starter": []
