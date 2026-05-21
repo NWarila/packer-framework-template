@@ -1,1 +1,1 @@
-{"image_key":"reference-minimal","build_target":"linux"}
+{"generated_by":"packer-framework-template","image_key":"reference-minimal","os_family":"linux","secret_seed_id":"fixture"}

@@ -198,8 +198,8 @@
       "target": "tests/fixtures/render-golden/minimal/expected/build-context.json"
     },
     {
-      "source": "tests/fixtures/render-golden/minimal/expected/user-data",
-      "target": "tests/fixtures/render-golden/minimal/expected/user-data"
+      "source": "tests/fixtures/render-golden/minimal/expected/builder-contract.json",
+      "target": "tests/fixtures/render-golden/minimal/expected/builder-contract.json"
     },
     {
       "source": "tests/fixtures/render-golden/minimal/request.json",
