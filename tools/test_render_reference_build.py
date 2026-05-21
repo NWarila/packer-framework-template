@@ -6,6 +6,7 @@ from __future__ import annotations
 import base64
 import json
 import os
+import re
 import subprocess
 import sys
 import tempfile
@@ -15,6 +16,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "tools" / "render_reference_build.py"
+PACKER_LOCALS = ROOT / "packer" / "locals.pkr.hcl"
 REQUEST_ENV = "PACKER_RENDER_REQUEST_B64"
 
 
@@ -107,9 +109,9 @@ def test_rejects_quote_in_path(repo_root: Path) -> None:
 
 
 def test_golden_minimal_render(repo_root: Path) -> None:
-    """Snapshot test: rendered files must byte-match committed golden fixtures.
+    """Snapshot test: helper outputs must byte-match committed golden fixtures.
 
-    Regression detector for the renderer's path-resolution and write path.
+    Regression detector for the render helper's path-resolution and write path.
     If the renderer behavior legitimately changes, regenerate the golden
     files in tests/fixtures/render-golden/minimal/expected/ and re-commit.
     """
@@ -147,6 +149,37 @@ def test_golden_minimal_render(repo_root: Path) -> None:
             )
 
 
+def test_golden_fixture_matches_packer_render_request_contract() -> None:
+    """Keep the golden request aligned with locals.render_request_json."""
+    locals_text = PACKER_LOCALS.read_text(encoding="utf-8")
+    render_request = re.search(
+        r"render_request_json\s*=\s*jsonencode\(\{(?P<body>.*?)\n\s*\}\)",
+        locals_text,
+        flags=re.DOTALL,
+    )
+    if render_request is None:
+        raise AssertionError("locals.render_request_json block not found")
+
+    body = render_request.group("body")
+    expected_paths = {"local.build_context_output_path", "local.builder_contract_path"}
+    for expected_path in expected_paths:
+        if expected_path not in body:
+            raise AssertionError(f"render request missing {expected_path}")
+    if "local.install_output_path" in body:
+        raise AssertionError("render helper request must not duplicate the Packer file source")
+
+    fixture = json.loads(
+        (ROOT / "tests" / "fixtures" / "render-golden" / "minimal" / "request.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    requested_names = {Path(item["path"]).name for item in fixture["files"]}
+    if requested_names != {"build-context.json", "builder-contract.json"}:
+        raise AssertionError(
+            f"golden fixture does not match render request files: {requested_names}"
+        )
+
+
 def main() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         tmp_root = Path(tmp).resolve()
@@ -158,6 +191,7 @@ def main() -> int:
     with tempfile.TemporaryDirectory() as tmp:
         repo_root = Path(tmp).resolve()
         test_golden_minimal_render(repo_root)
+    test_golden_fixture_matches_packer_render_request_contract()
     print("render_reference_build.py tests passed")
     return 0
 

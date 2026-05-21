@@ -1,12 +1,12 @@
 {
   "files": [
     {
-      "content_b64": "I2Nsb3VkLWNvbmZpZwojIHJlbmRlcmVkIGZpeHR1cmU6IG1pbmltYWwKaG9zdG5hbWU6IGV4YW1wbGUtYnVpbGRlcgo=",
-      "path": "__REPO_ROOT__/packer/artifacts/reference-minimal/user-data"
+      "content_b64": "eyJnZW5lcmF0ZWRfYnkiOiJwYWNrZXItZnJhbWV3b3JrLXRlbXBsYXRlIiwiaW1hZ2Vfa2V5IjoicmVmZXJlbmNlLW1pbmltYWwiLCJvc19mYW1pbHkiOiJsaW51eCIsInNlY3JldF9zZWVkX2lkIjoiZml4dHVyZSJ9Cg==",
+      "path": "__REPO_ROOT__/packer/artifacts/reference-minimal/build-context.json"
     },
     {
-      "content_b64": "eyJpbWFnZV9rZXkiOiJyZWZlcmVuY2UtbWluaW1hbCIsImJ1aWxkX3RhcmdldCI6ImxpbnV4In0K",
-      "path": "__REPO_ROOT__/packer/artifacts/reference-minimal/build-context.json"
+      "content_b64": "eyJib290X2NvbW1hbmQiOlsiPHdhaXQ+Il0sImJ1aWxkZXJfZmFtaWx5IjoibGludXgiLCJjZF9maWxlcyI6WyJ1c2VyLWRhdGEiXSwiaHR0cF9kaXJlY3RvcnkiOiJhcnRpZmFjdC1kaXIiLCJpbWFnZV9rZXkiOiJyZWZlcmVuY2UtbWluaW1hbCJ9Cg==",
+      "path": "__REPO_ROOT__/packer/artifacts/reference-minimal/builder-contract.json"
     }
   ],
   "image_key": "reference-minimal",

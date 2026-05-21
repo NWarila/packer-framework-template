@@ -1,0 +1,1 @@
+{"boot_command":["<wait>"],"builder_family":"linux","cd_files":["user-data"],"http_directory":"artifact-dir","image_key":"reference-minimal"}
