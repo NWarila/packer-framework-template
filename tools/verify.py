@@ -143,10 +143,18 @@ def validate(case: str) -> None:
     )
 
 
+def validate_syntax_only() -> None:
+    config = load_ci_config(ROOT)
+    run(["packer", "validate", "-syntax-only", config.get("packer_root", "packer")])
+
+
 def build_steps(case: str) -> dict[str, Step]:
     shell_helpers = sorted(
         path.relative_to(ROOT).as_posix() for path in (ROOT / "tools" / "ci").glob("*.sh")
     )
+    install_helper = ROOT / "tools" / "install_ci_tools.sh"
+    if install_helper.is_file():
+        shell_helpers.append(install_helper.relative_to(ROOT).as_posix())
     bats_tests = sorted(
         path.relative_to(ROOT).as_posix() for path in (ROOT / "tests" / "ci").glob("*.bats")
     )
@@ -161,6 +169,7 @@ def build_steps(case: str) -> dict[str, Step]:
             [PYTHON, "tools/check_packer_plugin_provenance.py", "--installed"]
         ),
         "validate": lambda: validate(case),
+        "validate-syntax-only": validate_syntax_only,
         "inspect": lambda: run(["packer", "inspect", "packer"]),
         "ruff": lambda: (
             install("ruff==0.13.0"),
@@ -179,6 +188,11 @@ def build_steps(case: str) -> dict[str, Step]:
             run([PYTHON, "tools/ci/check_workflow_run_inputs.py", ".github/workflows"]),
             run([*command_from_env("BATS", "bats"), *bats_tests]),
         ),
+        "privileged-workflows": lambda: (
+            install("pyyaml==6.0.3"),
+            run([PYTHON, "tools/check_privileged_workflows.py", "--repo-root", "."]),
+            run([PYTHON, "tools/run_privileged_workflow_tests.py"]),
+        ),
         "opa-test": lambda: run(["opa", "test", "policies/opa"]),
         "opa-policy": opa_policy,
         "opa-artifact": lambda: opa_artifact(case),
@@ -196,19 +210,29 @@ def build_steps(case: str) -> dict[str, Step]:
 
 
 TARGETS: dict[str, tuple[str, ...]] = {
+    "packer-syntax": ("fmt-check", "validate-syntax-only"),
+    "packer-validate-safe": ("opa-policy", "validate"),
     "lint": (
-        "fmt-check",
+        "packer-syntax",
         "init",
         "plugin-provenance",
         "plugin-install-check",
-        "validate",
+        "packer-validate-safe",
         "inspect",
         "ruff",
         "yamllint",
     ),
     "policy": ("opa-test", "opa-policy", "opa-artifact"),
     "docs-check": ("docs-diff", "docs-layout", "adr-schema"),
-    "ci": ("lint", "test", "workflow-helper-tests", "policy", "docs-check", "manifest-check"),
+    "ci": (
+        "lint",
+        "test",
+        "workflow-helper-tests",
+        "privileged-workflows",
+        "policy",
+        "docs-check",
+        "manifest-check",
+    ),
     "verify": ("ci", "integration"),
 }
 

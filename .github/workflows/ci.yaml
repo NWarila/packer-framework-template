@@ -50,7 +50,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bats shellcheck
       - name: ShellCheck workflow helpers
-        run: shellcheck tools/ci/*.sh
+        run: shellcheck tools/install_ci_tools.sh tools/ci/*.sh
       - name: Check workflow run-block input binding
         run: python tools/ci/check_workflow_run_inputs.py .github/workflows
       - name: Bats workflow helper tests
@@ -80,28 +80,13 @@ jobs:
           fetch-depth: 1
           persist-credentials: false
 
-      - name: Install Packer
-        # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
+      - name: Install pinned CI tools
         env:
+          # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
           PACKER_VERSION: "1.15.0"
-        run: |
-          set -euo pipefail
-          curl -fsSL -o /tmp/packer.zip \
-            "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
-          unzip -q /tmp/packer.zip -d /tmp/packer
-          install -m 0755 /tmp/packer/packer /usr/local/bin/packer
-          packer version
-
-      - name: Install OPA
-        # renovate: datasource=github-releases depName=open-policy-agent/opa
-        env:
+          # renovate: datasource=github-releases depName=open-policy-agent/opa
           OPA_VERSION: "1.10.0"
-        run: |
-          set -euo pipefail
-          curl -fsSL -o /usr/local/bin/opa \
-            "https://openpolicyagent.org/downloads/v${OPA_VERSION}/opa_linux_amd64_static"
-          chmod +x /usr/local/bin/opa
-          opa version
+        run: bash tools/install_ci_tools.sh
 
       - name: Install Bats and ShellCheck
         run: |
@@ -125,11 +110,13 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install Packer
+      - name: Install Packer and OPA
         shell: pwsh
         env:
           # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
           PACKER_VERSION: "1.15.0"
+          # renovate: datasource=github-releases depName=open-policy-agent/opa
+          OPA_VERSION: "1.10.0"
         run: |
           $ErrorActionPreference = "Stop"
           $zip = Join-Path $env:RUNNER_TEMP "packer.zip"
@@ -154,13 +141,29 @@ jobs:
             throw "SHA256 mismatch for $fileName. Expected $expected, got $actual"
           }
           Expand-Archive -Path $zip -DestinationPath $dest -Force
+
+          $opa = Join-Path $dest "opa.exe"
+          $opaChecksum = Join-Path $env:RUNNER_TEMP "opa_windows_amd64.exe.sha256"
+          Invoke-WebRequest `
+            -Uri "https://github.com/open-policy-agent/opa/releases/download/v$env:OPA_VERSION/opa_windows_amd64.exe" `
+            -OutFile $opa
+          Invoke-WebRequest `
+            -Uri "https://github.com/open-policy-agent/opa/releases/download/v$env:OPA_VERSION/opa_windows_amd64.exe.sha256" `
+            -OutFile $opaChecksum
+          $expectedOpa = ((Get-Content $opaChecksum | Select-Object -First 1) -split "\s+")[0].ToLowerInvariant()
+          $actualOpa = (Get-FileHash -Algorithm SHA256 $opa).Hash.ToLowerInvariant()
+          if ($actualOpa -ne $expectedOpa) {
+            throw "SHA256 mismatch for OPA. Expected $expectedOpa, got $actualOpa"
+          }
+
           Add-Content -Path $env:GITHUB_PATH -Value $dest
           & (Join-Path $dest "packer.exe") version
+          & $opa version
 
       - name: Verify path-sensitive cases
         shell: pwsh
         run: |
           python tools/verify.py init
           python tools/verify.py plugin-install-check
-          python tools/verify.py validate --case reference-windows
+          python tools/verify.py packer-validate-safe --case reference-windows
           python tools/verify.py test
