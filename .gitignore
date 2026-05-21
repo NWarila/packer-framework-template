@@ -146,3 +146,11 @@
 !/tests/ci/packer_var_file_args.bats
 !/tests/ci/validate_framework_ref.bats
 !/tests/ci/validate_input_ref.bats
+
+# Renderer golden fixtures (Codex Phase 4)
+!/tests/fixtures/render-golden/
+!/tests/fixtures/render-golden/minimal/
+!/tests/fixtures/render-golden/minimal/request.json
+!/tests/fixtures/render-golden/minimal/expected/
+!/tests/fixtures/render-golden/minimal/expected/user-data
+!/tests/fixtures/render-golden/minimal/expected/build-context.json
