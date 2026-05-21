@@ -50,6 +50,7 @@
 !/docs/reference/invariants.md
 !/docs/reference/mirroring.md
 !/docs/reference/packer.md
+!/docs/reference/quality-gates.md
 !/docs/reference/release-gates.md
 !/docs/reference/runner-protocol.md
 !/docs/explanation/
@@ -128,6 +129,9 @@
 !/tools/check_adr_schema.py
 !/tools/check_baseline_manifest.py
 !/tools/check_docs_layout.py
+!/tools/check_privileged_workflows.py
+!/tools/install_ci_tools.sh
+!/tools/run_privileged_workflow_tests.py
 !/tools/verify.py
 !/tools/ci/
 !/tools/ci/_config.py
@@ -146,3 +150,18 @@
 !/tests/ci/packer_var_file_args.bats
 !/tests/ci/validate_framework_ref.bats
 !/tests/ci/validate_input_ref.bats
+!/tests/fixtures/
+!/tests/fixtures/privileged-workflows/
+!/tests/fixtures/privileged-workflows/bad/
+!/tests/fixtures/privileged-workflows/bad/.github/
+!/tests/fixtures/privileged-workflows/bad/.github/workflows/
+!/tests/fixtures/privileged-workflows/bad/.github/workflows/auto-merge.yaml
+!/tests/fixtures/privileged-workflows/good/
+!/tests/fixtures/privileged-workflows/good/.github/
+!/tests/fixtures/privileged-workflows/good/.github/workflows/
+!/tests/fixtures/privileged-workflows/good/.github/workflows/auto-merge.yaml
+!/tests/fixtures/privileged-workflows/reusable-bad/
+!/tests/fixtures/privileged-workflows/reusable-bad/.github/
+!/tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/
+!/tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/caller.yaml
+!/tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/reusable-pwn.yaml

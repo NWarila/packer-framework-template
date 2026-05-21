@@ -305,3 +305,50 @@ test_provider_unprefixed_version_denied if {
 }
 
 # endregion --- [ Plugin version pinning ] ------------------------------------------------- #
+
+# region ------ [ Validate-safe datasource guard ] ----------------------------------------- #
+
+test_validate_safe_allows_annotated_datasource if {
+	count(repo_hygiene.deny) == 0 with input as {
+		"workflows": {},
+		"files": {
+			"packer/plugin-provenance.json": git_plugin_provenance,
+			"packer/packer.pkr.hcl": `packer {
+  required_version = "= 1.15.0"
+  required_plugins {
+    git = {
+      source  = "github.com/ethanmdavidson/git"
+      version = "= 0.6.5"
+    }
+  }
+}`,
+			"packer/data.pkr.hcl": `# datasource: ok-at-validate
+data "git-repository" "cwd" {}`,
+		},
+	}
+}
+
+test_validate_safe_denies_unannotated_datasource if {
+	denials := repo_hygiene.deny with input as {
+		"workflows": {},
+		"files": {
+			"packer/plugin-provenance.json": git_plugin_provenance,
+			"packer/packer.pkr.hcl": `packer {
+  required_version = "= 1.15.0"
+  required_plugins {
+    git = {
+      source  = "github.com/ethanmdavidson/git"
+      version = "= 0.6.5"
+    }
+  }
+}`,
+			"packer/data.pkr.hcl": `data "amazon-ami" "latest" {
+  owners = ["self"]
+}`,
+		},
+	}
+	some msg in denials
+	contains(msg, "datasource: ok-at-validate")
+}
+
+# endregion --- [ Validate-safe datasource guard ] ----------------------------------------- #

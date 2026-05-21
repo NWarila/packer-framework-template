@@ -14,8 +14,9 @@ name: Reusable Packer Framework Build
 #   3. Checks out an optional input repository at input_ref.
 #   4. Applies overlay_paths, constrained to packer/repos/ and
 #      packer/fixtures/runtime/.
-#   5. Installs the pinned Packer CLI version.
-#   6. Runs packer init, validate, inspect, and optionally build.
+#   5. Installs the pinned Packer CLI and OPA versions.
+#   6. Runs syntax-only validation, packer init, validate-safe, inspect,
+#      and optionally build.
 #   7. Uploads generated artifacts/manifests when requested.
 
 on:
@@ -64,6 +65,11 @@ on:
         required: false
         type: string
         default: "1.15.0"
+      opa_version:
+        description: Exact OPA CLI version to install for validate-safe policy.
+        required: false
+        type: string
+        default: "1.10.0"
       var_file:
         description: |
           Optional newline-separated paths within the input checkout to Packer
@@ -178,17 +184,13 @@ jobs:
           set -euo pipefail
           bash framework/tools/ci/apply_overlay.sh input framework "${OVERLAY_PATHS}"
 
-      - name: Install Packer
+      - name: Install pinned Packer and OPA
         # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
         env:
           PACKER_VERSION: ${{ inputs.packer_version }}
-        run: |
-          set -euo pipefail
-          curl -fsSL -o /tmp/packer.zip \
-            "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
-          unzip -q /tmp/packer.zip -d /tmp/packer
-          install -m 0755 /tmp/packer/packer /usr/local/bin/packer
-          packer version
+          # renovate: datasource=github-releases depName=open-policy-agent/opa
+          OPA_VERSION: ${{ inputs.opa_version }}
+        run: bash framework/tools/install_ci_tools.sh
 
       - name: Resolve var-file argument
         id: varfile
@@ -206,12 +208,23 @@ jobs:
         working-directory: framework
         run: packer init packer
 
-      - name: packer validate
+      - name: packer syntax
+        working-directory: framework
+        run: python tools/verify.py packer-syntax
+
+      - name: packer validate-safe
         working-directory: framework
         env:
           VAR_FILE_ARGS: ${{ steps.varfile.outputs.args }}
         run: |
           set -euo pipefail
+          python tools/build_opa_input.py --repo-root . \
+            | opa eval \
+                --fail-defined \
+                --format pretty \
+                --stdin-input \
+                --data policies/opa \
+                "data.repo_hygiene.deny[_]"
           args=( validate )
           if [ -n "${VAR_FILE_ARGS}" ]; then
             while IFS= read -r arg; do
