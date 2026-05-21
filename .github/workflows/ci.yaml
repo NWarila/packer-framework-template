@@ -121,19 +121,38 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
 
       - name: Install Packer
-        # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
         shell: pwsh
         env:
+          # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
           PACKER_VERSION: "1.15.0"
         run: |
           $ErrorActionPreference = "Stop"
           $zip = Join-Path $env:RUNNER_TEMP "packer.zip"
+          $checksums = Join-Path $env:RUNNER_TEMP "packer_SHA256SUMS"
           $dest = Join-Path $env:RUNNER_TEMP "packer"
+          $fileName = "packer_$($env:PACKER_VERSION)_windows_amd64.zip"
           Invoke-WebRequest `
-            -Uri "https://releases.hashicorp.com/packer/$env:PACKER_VERSION/packer_$($env:PACKER_VERSION)_windows_amd64.zip" `
+            -Uri "https://releases.hashicorp.com/packer/$env:PACKER_VERSION/$fileName" `
             -OutFile $zip
+          Invoke-WebRequest `
+            -Uri "https://releases.hashicorp.com/packer/$env:PACKER_VERSION/packer_$($env:PACKER_VERSION)_SHA256SUMS" `
+            -OutFile $checksums
+          $line = Get-Content $checksums | Where-Object {
+            $_ -match "\s+$([regex]::Escape($fileName))$"
+          } | Select-Object -First 1
+          if (-not $line) {
+            throw "Checksum entry for $fileName was not found"
+          }
+          $expected = (($line -split "\s+")[0]).ToLowerInvariant()
+          $actual = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLowerInvariant()
+          if ($actual -ne $expected) {
+            throw "SHA256 mismatch for $fileName. Expected $expected, got $actual"
+          }
           Expand-Archive -Path $zip -DestinationPath $dest -Force
           Add-Content -Path $env:GITHUB_PATH -Value $dest
           & (Join-Path $dest "packer.exe") version
