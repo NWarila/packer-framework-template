@@ -13,7 +13,7 @@ from typing import Any
 
 USES_LINE_RE = re.compile(r"^\s*(?:-\s*)?uses:\s*(.+?)\s*(?:#.*)?$")
 WORKFLOW_GLOBS = ("*.yml", "*.yaml")
-POLICY_FILE_PATHS = ("packer/packer.pkr.hcl", "packer/plugin-provenance.json")
+POLICY_FILE_PATHS = ("packer/plugin-provenance.json",)
 
 
 def normalize_uses(value: str) -> str:
@@ -50,6 +50,11 @@ def collect_files(repo_root: Path) -> dict[str, str]:
         path = repo_root / rel
         if path.is_file():
             files[rel] = path.read_text(encoding="utf-8")
+
+    packer_dir = repo_root / "packer"
+    if packer_dir.is_dir():
+        for path in sorted(packer_dir.rglob("*.pkr.hcl")):
+            files[path.relative_to(repo_root).as_posix()] = path.read_text(encoding="utf-8")
 
     workflows_dir = repo_root / ".github" / "workflows"
     if workflows_dir.is_dir():

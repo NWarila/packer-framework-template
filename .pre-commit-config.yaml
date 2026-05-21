@@ -29,7 +29,7 @@ repos:
     rev: 99470f5e12208ff0fb17ab81c3c494f7620a1d8d # v0.11.0
     hooks:
       - id: shellcheck
-        files: ^tools/ci/.*\.sh$
+        files: ^tools/(install_ci_tools|ci/.*)\.sh$
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: 996abf60411a8d954288ac9856aae7602b80cbda # v0.22.1

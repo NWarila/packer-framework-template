@@ -1,0 +1,21 @@
+name: Bad Auto-Merge
+
+# Fixture: pull_request_target that checks out PR head -- the canonical
+# pwn-request pattern. Must be rejected by tools/check_privileged_workflows.py.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  pwn:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - run: echo "now PR-controlled code can run with secrets"
