@@ -171,5 +171,5 @@
 !/tests/fixtures/render-golden/minimal/
 !/tests/fixtures/render-golden/minimal/request.json
 !/tests/fixtures/render-golden/minimal/expected/
-!/tests/fixtures/render-golden/minimal/expected/user-data
 !/tests/fixtures/render-golden/minimal/expected/build-context.json
+!/tests/fixtures/render-golden/minimal/expected/builder-contract.json
