@@ -94,6 +94,10 @@
       "target": "docs/reference/mirroring.md"
     },
     {
+      "source": "docs/reference/quality-gates.md",
+      "target": "docs/reference/quality-gates.md"
+    },
+    {
       "source": "docs/reference/release-gates.md",
       "target": "docs/reference/release-gates.md"
     },
@@ -162,12 +166,24 @@
       "target": "tools/check_packer_plugin_provenance.py"
     },
     {
+      "source": "tools/check_privileged_workflows.py",
+      "target": "tools/check_privileged_workflows.py"
+    },
+    {
       "source": "tools/gen_packer_docs.py",
       "target": "tools/gen_packer_docs.py"
     },
     {
+      "source": "tools/install_ci_tools.sh",
+      "target": "tools/install_ci_tools.sh"
+    },
+    {
       "source": "tools/render_reference_build.py",
       "target": "tools/render_reference_build.py"
+    },
+    {
+      "source": "tools/run_privileged_workflow_tests.py",
+      "target": "tools/run_privileged_workflow_tests.py"
     },
     {
       "source": "tools/test_packer_variable_validation.py",
@@ -232,6 +248,22 @@
     {
       "source": "tests/ci/validate_input_ref.bats",
       "target": "tests/ci/validate_input_ref.bats"
+    },
+    {
+      "source": "tests/fixtures/privileged-workflows/bad/.github/workflows/auto-merge.yaml",
+      "target": "tests/fixtures/privileged-workflows/bad/.github/workflows/auto-merge.yaml"
+    },
+    {
+      "source": "tests/fixtures/privileged-workflows/good/.github/workflows/auto-merge.yaml",
+      "target": "tests/fixtures/privileged-workflows/good/.github/workflows/auto-merge.yaml"
+    },
+    {
+      "source": "tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/caller.yaml",
+      "target": "tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/caller.yaml"
+    },
+    {
+      "source": "tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/reusable-pwn.yaml",
+      "target": "tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/reusable-pwn.yaml"
     },
     {
       "source": "policies/opa/packer_artifact.rego",
