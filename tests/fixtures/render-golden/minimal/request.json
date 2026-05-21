@@ -1,0 +1,14 @@
+{
+  "files": [
+    {
+      "content_b64": "I2Nsb3VkLWNvbmZpZwojIHJlbmRlcmVkIGZpeHR1cmU6IG1pbmltYWwKaG9zdG5hbWU6IGV4YW1wbGUtYnVpbGRlcgo=",
+      "path": "__REPO_ROOT__/packer/artifacts/reference-minimal/user-data"
+    },
+    {
+      "content_b64": "eyJpbWFnZV9rZXkiOiJyZWZlcmVuY2UtbWluaW1hbCIsImJ1aWxkX3RhcmdldCI6ImxpbnV4In0K",
+      "path": "__REPO_ROOT__/packer/artifacts/reference-minimal/build-context.json"
+    }
+  ],
+  "image_key": "reference-minimal",
+  "repo_root": "__REPO_ROOT__"
+}
