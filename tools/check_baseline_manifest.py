@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -11,6 +12,22 @@ INVENTORY_ROOTS = ("tools", "tests", "policies", "fixtures")
 INVENTORY_WORKFLOW_GLOBS = ("reusable-*.yaml", "reusable-*.yml")
 SKIP_PARTS = {"__pycache__"}
 SKIP_SUFFIXES = {".pyc", ".pyo"}
+
+
+def tracked_files() -> set[str] | None:
+    """Return git-tracked file paths (POSIX, repo-rooted) or None if git is unavailable."""
+    try:
+        completed = subprocess.run(
+            ["git", "ls-files"],
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        return None
+    if completed.returncode != 0:
+        return None
+    return {line.strip() for line in completed.stdout.splitlines() if line.strip()}
 
 
 def fail(message: str) -> None:
@@ -92,10 +109,14 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    manifest = Path("baseline-manifest.json")
     try:
-        raw = json.loads(Path("baseline-manifest.json").read_text(encoding="utf-8"))
+        raw_text = manifest.read_text(encoding="utf-8")
+        raw = json.loads(raw_text)
     except json.JSONDecodeError as exc:
         fail(f"baseline-manifest.json is not valid JSON: {exc}")
+    if raw_text != json.dumps(raw, indent=2) + "\n":
+        fail("baseline-manifest.json must use canonical 2-space JSON formatting")
     if not isinstance(raw, dict) or "version" not in raw:
         fail("root must be an object with a 'version' field")
     if raw["version"] not in {"1", "2"}:
@@ -126,6 +147,14 @@ def main() -> None:
     missing = [source for source in sources if not Path(source).is_file()]
     if missing:
         fail(f"sources missing: {missing}")
+
+    tracked = tracked_files()
+    if tracked is None:
+        print("not a git repo: skipping tracked-source check")
+    else:
+        untracked = [source for source in sources if source not in tracked]
+        if untracked:
+            fail(f"sources listed in manifest are not tracked in git: {untracked}")
 
     listed_sources = set(sources)
     template_adrs = sorted(
