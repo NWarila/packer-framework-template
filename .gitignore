@@ -6,6 +6,7 @@
 !/.editorconfig
 !/.markdownlint-cli2.jsonc
 !/.pre-commit-config.yaml
+!/.gitleaks.toml
 !/Makefile
 
 !/README.md
