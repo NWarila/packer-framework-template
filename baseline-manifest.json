@@ -94,6 +94,10 @@
       "target": "docs/decision-records/template/0004-isolate-pull-request-target-triggers.md"
     },
     {
+      "source": "docs/decision-records/template/0005-define-data-only-packer-runner-repositories.md",
+      "target": "docs/decision-records/template/0005-define-data-only-packer-runner-repositories.md"
+    },
+    {
       "source": "docs/decision-records/template/README.md",
       "target": "docs/decision-records/template/README.md"
     },

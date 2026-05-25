@@ -6,6 +6,8 @@ This template is intentionally split into shared repo-quality baseline and Packe
 
 Derivative Packer frameworks should mirror the files listed under `byte_identical` in [`baseline-manifest.json`](../../baseline-manifest.json). That set is the stable scaffold: repository hygiene, docs layout checks, security callers, Packer-oriented Renovate rules, universal OPA policy, and the Python verification entrypoint.
 
+Use `byte_identical` only for files a downstream framework should keep byte-for-byte with this template. Use `scaffold_starter` for examples, fixtures, and implementation seeds that demonstrate the pattern but are expected to change in a real framework.
+
 The manifest is intentionally narrower than a full repo copy. It does not require downstream frameworks to keep the reference `file` source or the starter examples byte-identical.
 
 ## Framework-Owned Layer
