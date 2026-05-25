@@ -1,0 +1,15 @@
+# Gitleaks configuration for packer-framework-template.
+#
+# Extend the default Gitleaks rule set; do not redefine rules.
+[extend]
+useDefault = true
+
+# Allowlist files that legitimately contain credential / private-key
+# substrings as part of their declared purpose — for example, OPA policies
+# whose job is to detect those substrings inside built artifacts.
+[allowlist]
+description = "OPA policy detection-pattern registries that intentionally contain credential / key markers as match strings rather than as live secrets"
+paths = [
+  '''policies/opa/packer_artifact\.rego''',
+  '''policies/opa/packer_artifact_test\.rego''',
+]
