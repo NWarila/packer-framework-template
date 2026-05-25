@@ -19,7 +19,7 @@ role determines *when* the check runs and *what failure means*.
 | packer validate-safe (`verify.py packer-validate-safe`) | `verify.py` local/CI target | Blocking | Runs OPA repo-hygiene before `packer validate`; unannotated `data` blocks in `packer/*.pkr.hcl` fail unless explicitly tagged `# datasource: ok-at-validate`. |
 | workflow-helper-tests | `verify.py workflow-helper-tests` (in `ci` target) | Blocking | ShellCheck on `tools/ci/*.sh`, Python workflow-input checks, Bats coverage. |
 | privileged-workflows | `verify.py privileged-workflows` (in `ci` target) | Blocking | `check_privileged_workflows.py` + fixture-driven test runner. Rejects `actions/checkout` and PR-controlled refs in any `pull_request_target` workflow, transitively through local reusables. |
-| plugin-provenance | `verify.py plugin-provenance` and `verify.py plugin-install-check` | Blocking | Verifies the `*.pkr.hcl.lock.json` and the installed plugin binaries match the declared provenance. Prevents silent plugin drift. |
+| plugin-provenance | `verify.py plugin-provenance` and `verify.py plugin-install-check` | Blocking | Verifies that pinned `required_plugins` in `packer/packer.pkr.hcl` resolve against the committed `packer/plugin-provenance.json` checksum table and (under `--installed`) that locally installed plugin binaries match those checksums. Prevents silent plugin drift. |
 | rendered-build / variable-validation tests | `verify.py test` (`test_render_reference_build.py`, `test_packer_variable_validation.py`) | Blocking | Negative-path coverage: bad variable shapes must fail validation. |
 | drift-gate | `drift-gate.yaml` | Blocking | Verifies the org-baseline overlay matches `NWarila/.github` at the pinned source ref. |
 | Trivy IaC misconfig + secrets | `security.yaml` -> `reusable-iac-security.yaml` (PR path) | Blocking | Trivy scan exit status is the gate; SARIF upload is advisory. |
@@ -27,7 +27,7 @@ role determines *when* the check runs and *what failure means*.
 | zizmor (Actions posture) | `security.yaml` -> `reusable-iac-security.yaml` | Blocking | Exit status is the gate; SARIF upload is advisory. |
 | CodeQL | `security.yaml` -> `reusable-codeql.yaml` | Blocking | SARIF upload is advisory. |
 | OpenSSF Scorecard | `security.yaml` -> `reusable-scorecard.yaml` | Scheduled / push / branch protection / manual; skipped on PR and merge queue | Posture telemetry; skipped on PR paths because Scorecard GraphQL is gated on private repos. |
-| Release evidence + SBOM + attestations | `release.yaml` -> `reusable-release-evidence.yaml` | Release | Bundles rendered Packer config, plugin lockfile, SBOM. Includes attestations for bundle and SBOM provenance. |
+| Release evidence + SBOM + attestations | `release.yaml` -> `reusable-release-evidence.yaml` | Release | Bundles rendered Packer config, `packer/plugin-provenance.json`, SBOM. Includes attestations for bundle and SBOM provenance. |
 | Auto-merge (trusted bots) | `auto-merge.yaml` -> `reusable-auto-merge.yaml` | Not a gate | Operates on `pull_request_target` with no PR checkout; must keep passing `privileged-workflows`. |
 
 ## What is intentionally **not** in PR CI

@@ -23,6 +23,8 @@ python tools/verify.py integration
 
 `python tools/verify.py ci` runs Packer formatting, init, validate, inspect, Python tooling, YAML checks, OPA policy, docs layout, ADR schema, and manifest checks. `python tools/verify.py integration` executes a real credential-free Packer build that renders installer content and writes build evidence under `packer/artifacts/` and `packer/manifests/`.
 
+The complete gate inventory lives in [`docs/reference/quality-gates.md`](docs/reference/quality-gates.md).
+
 ## Packer Framework Shape
 
 | File | Role |

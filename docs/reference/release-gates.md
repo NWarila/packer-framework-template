@@ -10,7 +10,10 @@ PRs to `main` on this template must pass:
 - `org-baseline / verify` (drift-gate against `NWarila/.github` at pinned source-ref)
 - `Trivy (filesystem & secrets)`, `Gitleaks (secret scan)`, `zizmor (Actions security)` (security)
 - `CodeQL` (`security.yaml`)
-- `OpenSSF Scorecard` (`security.yaml`)
+
+OpenSSF Scorecard runs on push, branch-protection, schedule, and manual paths;
+it is skipped on PR and merge queue because private-repo Scorecard GraphQL
+access is not reliable.
 
 Release candidates must also pass release evidence, including
 `python tools/check_packer_plugin_provenance.py --upstream`, before publishing
