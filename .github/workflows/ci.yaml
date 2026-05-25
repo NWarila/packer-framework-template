@@ -87,6 +87,8 @@ jobs:
         env:
           # renovate: datasource=github-releases depName=rhysd/actionlint
           ACTIONLINT_VERSION: "1.7.12"
+          # renovate: datasource=npm depName=markdownlint-cli2
+          MARKDOWNLINT_CLI2_VERSION: "0.22.1"
           # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
           PACKER_VERSION: "1.15.0"
           # renovate: datasource=github-releases depName=open-policy-agent/opa
