@@ -73,6 +73,7 @@
 !/docs/decision-records/template/0001-pin-packer-and-plugin-versions-exactly.md
 !/docs/decision-records/template/0002-keep-reference-framework-credential-free.md
 !/docs/decision-records/template/0004-isolate-pull-request-target-triggers.md
+!/docs/decision-records/template/0005-define-data-only-packer-runner-repositories.md
 !/docs/decision-records/repo/
 !/docs/decision-records/repo/.gitkeep
 

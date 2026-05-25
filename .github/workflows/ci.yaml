@@ -79,9 +79,16 @@ jobs:
         with:
           fetch-depth: 1
           persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
 
       - name: Install pinned CI tools
         env:
+          # renovate: datasource=github-releases depName=rhysd/actionlint
+          ACTIONLINT_VERSION: "1.7.12"
+          # renovate: datasource=npm depName=markdownlint-cli2
+          MARKDOWNLINT_CLI2_VERSION: "0.22.1"
           # renovate: datasource=github-releases depName=hashicorp/packer extractVersion=^v(?<version>.*)$
           PACKER_VERSION: "1.15.0"
           # renovate: datasource=github-releases depName=open-policy-agent/opa
