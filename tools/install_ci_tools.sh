@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Install pinned CI tools (Packer and OPA) on a Linux x86_64 runner.
+# Install pinned CI tools (actionlint, Packer, and OPA) on a Linux x86_64 runner.
 #
 # Each downloaded binary is verified against the checksum file published by
 # the upstream release. This catches mirror/transport tampering while keeping
@@ -71,6 +71,30 @@ install_opa() {
   "${bindir}/opa" version
 }
 
+install_actionlint() {
+  local v="$ACTIONLINT_VERSION"
+  local tar="actionlint_${v}_linux_amd64.tar.gz"
+  local sums="actionlint_${v}_checksums.txt"
+  local base="https://github.com/rhysd/actionlint/releases/download/v${v}"
+
+  curl --fail --silent --show-error --location -o "${workdir}/${tar}" "${base}/${tar}"
+  curl --fail --silent --show-error --location -o "${workdir}/${sums}" "${base}/${sums}"
+
+  local expected
+  expected="$(awk -v f="${tar}" '$2 == f {print $1}' "${workdir}/${sums}")"
+  if [ -z "$expected" ]; then
+    echo "error: ${tar} not found in ${sums}" >&2
+    exit 1
+  fi
+
+  verify_sha256 "${workdir}/${tar}" "$expected"
+  mkdir -p "${workdir}/actionlint"
+  tar -xzf "${workdir}/${tar}" -C "${workdir}/actionlint"
+  install -m 0755 "${workdir}/actionlint/actionlint" "${bindir}/actionlint"
+  "${bindir}/actionlint" -version
+}
+
+require_var ACTIONLINT_VERSION
 require_var PACKER_VERSION
 require_var OPA_VERSION
 
@@ -85,5 +109,6 @@ fi
 workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir"' EXIT
 
+install_actionlint
 install_packer
 install_opa
