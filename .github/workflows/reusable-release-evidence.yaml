@@ -72,10 +72,23 @@ jobs:
           PACKER_VERSION: ${{ inputs.packer_version }}
         run: |
           set -euo pipefail
-          curl -fsSL -o /tmp/packer.zip \
-            "https://releases.hashicorp.com/packer/${PACKER_VERSION}/packer_${PACKER_VERSION}_linux_amd64.zip"
-          unzip -q /tmp/packer.zip -d /tmp/packer
-          install -m 0755 /tmp/packer/packer /usr/local/bin/packer
+          workdir="$(mktemp -d)"
+          trap 'rm -rf "$workdir"' EXIT
+          zip="packer_${PACKER_VERSION}_linux_amd64.zip"
+          sums="packer_${PACKER_VERSION}_SHA256SUMS"
+          base="https://releases.hashicorp.com/packer/${PACKER_VERSION}"
+          curl --fail --silent --show-error --location -o "$workdir/$zip" "$base/$zip"
+          curl --fail --silent --show-error --location -o "$workdir/$sums" "$base/$sums"
+          expected="$(awk -v f="$zip" '$2 == f {print $1}' "$workdir/$sums")"
+          actual="$(sha256sum "$workdir/$zip" | awk '{print $1}')"
+          if [ -z "$expected" ] || [ "$actual" != "$expected" ]; then
+            echo "::error::Packer SHA256 verification failed"
+            echo "expected: $expected"
+            echo "actual:   $actual"
+            exit 1
+          fi
+          unzip -q "$workdir/$zip" -d "$workdir/packer"
+          install -m 0755 "$workdir/packer/packer" /usr/local/bin/packer
           packer version
 
       - name: Install OPA
@@ -85,9 +98,21 @@ jobs:
           OPA_VERSION: "1.10.0"
         run: |
           set -euo pipefail
-          curl -fsSL -o /usr/local/bin/opa \
-            "https://openpolicyagent.org/downloads/v${OPA_VERSION}/opa_linux_amd64_static"
-          chmod +x /usr/local/bin/opa
+          workdir="$(mktemp -d)"
+          trap 'rm -rf "$workdir"' EXIT
+          bin="opa_linux_amd64_static"
+          base="https://github.com/open-policy-agent/opa/releases/download/v${OPA_VERSION}"
+          curl --fail --silent --show-error --location -o "$workdir/$bin" "$base/$bin"
+          curl --fail --silent --show-error --location -o "$workdir/$bin.sha256" "$base/$bin.sha256"
+          expected="$(awk '{print $1}' "$workdir/$bin.sha256")"
+          actual="$(sha256sum "$workdir/$bin" | awk '{print $1}')"
+          if [ -z "$expected" ] || [ "$actual" != "$expected" ]; then
+            echo "::error::OPA SHA256 verification failed"
+            echo "expected: $expected"
+            echo "actual:   $actual"
+            exit 1
+          fi
+          install -m 0755 "$workdir/$bin" /usr/local/bin/opa
           opa version
 
       - name: Setup Python

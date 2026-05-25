@@ -75,3 +75,10 @@ repos:
         language: system
         pass_filenames: false
         files: ^docs/decision-records/.*\.md$|^tools/check_adr_schema.py$
+
+      - id: baseline-manifest
+        name: baseline manifest
+        entry: python tools/check_baseline_manifest.py
+        language: system
+        pass_filenames: false
+        files: ^baseline-manifest\.json$|^tools/check_baseline_manifest\.py$

@@ -82,10 +82,6 @@
       "target": "Makefile"
     },
     {
-      "source": "baseline-manifest.json",
-      "target": "baseline-manifest.json"
-    },
-    {
       "source": "docs/decision-records/template/0001-pin-packer-and-plugin-versions-exactly.md",
       "target": "docs/decision-records/template/0001-pin-packer-and-plugin-versions-exactly.md"
     },
@@ -104,6 +100,10 @@
     {
       "source": "docs/how-to/vendor-packer-plugins.md",
       "target": "docs/how-to/vendor-packer-plugins.md"
+    },
+    {
+      "source": "docs/reference/invariants.md",
+      "target": "docs/reference/invariants.md"
     },
     {
       "source": "docs/reference/mirroring.md",
@@ -294,5 +294,10 @@
       "target": "tools/verify.py"
     }
   ],
-  "scaffold_starter": []
+  "scaffold_starter": [
+    {
+      "source": "baseline-manifest.json",
+      "target": "baseline-manifest.json"
+    }
+  ]
 }
