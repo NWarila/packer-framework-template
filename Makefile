@@ -80,14 +80,7 @@ adr-schema:
 	$(PYTHON) tools/verify.py adr-schema
 
 lint:
-	$(MAKE) fmt-check
-	$(MAKE) init
-	$(MAKE) plugin-provenance
-	$(MAKE) plugin-install-check
-	$(MAKE) validate
-	$(MAKE) inspect
-	$(MAKE) ruff
-	$(MAKE) yamllint
+	$(PYTHON) tools/verify.py lint
 
 policy:
 	$(MAKE) opa-test
