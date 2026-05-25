@@ -49,13 +49,22 @@
       ]
     },
     {
+      // Packer plugin `source` paths use Packer's hosting convention
+      // (`github.com/<owner>/<short>`) which omits the `packer-plugin-`
+      // repo-name prefix. Renovate's github-releases datasource needs the
+      // real `<owner>/packer-plugin-<short>` package name to look up tags,
+      // so we capture owner + short separately and template the real name.
+      // Latest tags are `v<semver>`; strip the leading `v` for HCL match.
       "customType": "regex",
       "managerFilePatterns": [
         "/^packer\\/packer\\.pkr\\.hcl$/"
       ],
       "datasourceTemplate": "github-releases",
+      "depNameTemplate": "github.com/{{owner}}/{{short}}",
+      "packageNameTemplate": "{{owner}}/packer-plugin-{{short}}",
+      "extractVersionTemplate": "^v(?<version>.*)$",
       "matchStrings": [
-        "source\\s*=\\s*\"(?<depName>github\\.com/[^\"]+)\"\\s+version\\s*=\\s*\"=\\s*(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)\""
+        "source\\s*=\\s*\"github\\.com/(?<owner>[^/]+)/(?<short>[^\"]+)\"\\s+version\\s*=\\s*\"=\\s*(?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)\""
       ]
     },
     {
