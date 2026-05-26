@@ -25,10 +25,10 @@ jobs:
     steps:
       - name: Drift gate (org baseline)
         # renovate: datasource=git-refs depName=NWarila/drift-gate
-        uses: NWarila/drift-gate@a29b46ba971b55956994d51684c44d6861f7b4bf
+        uses: NWarila/drift-gate@a29b46ba971b55956994d51684c44d6861f7b4bf # main @ 2026-05-11
         with:
           source-repo: NWarila/.github
           # renovate: depName=NWarila/.github packageName=NWarila/.github currentValue=main
-          source-ref: 343a61a1c6acdf2d243a01819cd07eb954190bc1
+          source-ref: 1cb2d980657e3e56ee3efbb0381dcae5d0f04e07 # canonical reusables landed 2026-05-26 (PRs #9, #10)
           manifest: baseline-manifest.json
           check-name: org-baseline / verify
