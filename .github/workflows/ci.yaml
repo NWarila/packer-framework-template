@@ -94,6 +94,38 @@ jobs:
           python -m mypy --ignore-missing-imports tools/ \
             || echo "::warning::Mypy advisory reported findings (does not block merge)"
 
+  ruff-sarif:
+    name: ruff (SARIF → Security tab)
+    # Runs ruff with --output-format sarif so Python static-analysis findings
+    # flow into the consumer's GitHub Security tab alongside CodeQL, Trivy,
+    # Gitleaks, zizmor, and Scorecard. continue-on-error keeps Security-tab
+    # publishing advisory; existing verify.py lint gate remains the hard
+    # block.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.12"
+      - name: Install ruff
+        run: pip install --no-cache-dir ruff==0.13.0
+      - name: Run ruff with SARIF output
+        continue-on-error: true
+        run: ruff check --output-format sarif --output-file ruff.sarif tools/
+      - name: Upload ruff SARIF
+        if: always() && hashFiles('ruff.sarif') != ''
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
+        with:
+          sarif_file: ruff.sarif
+
   packer-ci:
     name: packer verify
     runs-on: ubuntu-latest

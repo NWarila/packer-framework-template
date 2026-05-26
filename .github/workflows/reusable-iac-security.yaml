@@ -1,7 +1,8 @@
 name: Reusable IaC Security
 
-# Universal IaC security scanning consumed by Packer template
-# repositories. Three independent jobs run in parallel:
+# Universal IaC security scanning consumed by every NWarila template
+# repository (Terraform / Packer / Ansible runner + framework templates).
+# Three independent jobs run in parallel:
 #
 # - Trivy:    filesystem misconfig + secret scanning, fail on HIGH/CRITICAL
 # - Gitleaks: full-history secret detection
@@ -79,13 +80,22 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Run Trivy policy and generate SARIF
+      - name: Generate Trivy SARIF report
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: "fs"
           scan-ref: "."
           format: "sarif"
           output: "trivy-results.sarif"
+          severity: ${{ inputs.trivy_severity }}
+          scanners: "misconfig,secret"
+
+      - name: Enforce Trivy policy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "fs"
+          scan-ref: "."
+          format: "table"
           severity: ${{ inputs.trivy_severity }}
           scanners: "misconfig,secret"
           exit-code: ${{ inputs.trivy_advisory && '0' || '1' }}
@@ -107,6 +117,7 @@ jobs:
     timeout-minutes: 10
     permissions:
       contents: read
+      security-events: write
       actions: read
     steps:
       - name: Check out repository
@@ -115,12 +126,25 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Run Gitleaks
+      - name: Run Gitleaks (with SARIF output)
         id: gitleaks_run
+        # Gitleaks 8.18+ supports --report-format sarif. Emitting SARIF
+        # lets findings flow into the consumer's GitHub Security tab
+        # alongside CodeQL, Trivy, zizmor, and Scorecard results.
         uses: docker://ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
         continue-on-error: ${{ inputs.gitleaks_advisory }}
         with:
-          args: detect --source . --redact --verbose --no-banner
+          args: detect --source . --redact --verbose --no-banner --report-format sarif --report-path gitleaks.sarif --exit-code 1
+
+      - name: Upload Gitleaks SARIF to GitHub Security
+        # SARIF upload requires GitHub Advanced Security on private repos.
+        # continue-on-error keeps the scan job green even if the upload is
+        # rejected — the gitleaks step above remains the gate.
+        if: always() && hashFiles('gitleaks.sarif') != ''
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@e46ed2cbd01164d986452f91f178727624ae40d7 # v4.35.3
+        with:
+          sarif_file: gitleaks.sarif
 
       - name: Surface Gitleaks advisory result
         if: ${{ inputs.gitleaks_advisory && steps.gitleaks_run.outcome == 'failure' }}
