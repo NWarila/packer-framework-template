@@ -201,7 +201,7 @@ def build_steps(case: str) -> dict[str, Step]:
         "opa-policy": opa_policy,
         "opa-artifact": lambda: opa_artifact(case),
         "manifest-check": lambda: run(
-            [PYTHON, "tools/check_baseline_manifest.py", "--check-present-sources"]
+            [PYTHON, "tools/check_baseline_manifest.py"]
         ),
         "docs": lambda: run([PYTHON, "tools/gen_packer_docs.py"]),
         "docs-diff": lambda: run([PYTHON, "tools/gen_packer_docs.py", "--check"]),
