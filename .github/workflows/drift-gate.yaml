@@ -29,6 +29,6 @@ jobs:
         with:
           source-repo: NWarila/.github
           # renovate: depName=NWarila/.github packageName=NWarila/.github currentValue=main
-          source-ref: 1cb2d980657e3e56ee3efbb0381dcae5d0f04e07 # canonical reusables landed 2026-05-26 (PRs #9, #10)
+          source-ref: e7456b0219e8750fbef8bd70a0f1ccf7d47f1c20 # slimmed manifest: reusables called not mirrored (.github #14)
           manifest: baseline-manifest.json
           check-name: org-baseline / verify

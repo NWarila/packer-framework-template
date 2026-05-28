@@ -10,6 +10,36 @@
       "target": ".gitattributes"
     },
     {
+      "source": ".github/workflows/security.yaml",
+      "target": ".github/workflows/security.yaml"
+    },
+    {
+      "source": ".markdownlint-cli2.jsonc",
+      "target": ".markdownlint-cli2.jsonc"
+    },
+    {
+      "source": ".pre-commit-config.yaml",
+      "target": ".pre-commit-config.yaml"
+    },
+    {
+      "source": "docs/reference/mirroring.md",
+      "target": "docs/reference/mirroring.md"
+    },
+    {
+      "source": "docs/reference/runner-protocol.md",
+      "target": "docs/reference/runner-protocol.md"
+    },
+    {
+      "source": "tools/check_docs_layout.py",
+      "target": "tools/check_docs_layout.py"
+    },
+    {
+      "source": "tools/install_ci_tools.sh",
+      "target": "tools/install_ci_tools.sh"
+    }
+  ],
+  "scaffold_starter": [
+    {
       "source": ".github/CODEOWNERS",
       "target": ".github/CODEOWNERS"
     },
@@ -22,96 +52,20 @@
       "target": ".github/renovate.json5"
     },
     {
-      "source": ".github/workflows/ci.yaml",
-      "target": ".github/workflows/ci.yaml"
-    },
-    {
-      "source": ".github/workflows/drift-gate.yaml",
-      "target": ".github/workflows/drift-gate.yaml"
-    },
-    {
-      "source": ".github/workflows/reusable-auto-merge.yaml",
-      "target": ".github/workflows/reusable-auto-merge.yaml"
-    },
-    {
-      "source": ".github/workflows/reusable-codeql.yaml",
-      "target": ".github/workflows/reusable-codeql.yaml"
-    },
-    {
-      "source": ".github/workflows/reusable-iac-security.yaml",
-      "target": ".github/workflows/reusable-iac-security.yaml"
-    },
-    {
-      "source": ".github/workflows/reusable-packer-framework-build.yaml",
-      "target": ".github/workflows/reusable-packer-framework-build.yaml"
-    },
-    {
-      "source": ".github/workflows/reusable-release-evidence.yaml",
-      "target": ".github/workflows/reusable-release-evidence.yaml"
-    },
-    {
-      "source": ".github/workflows/reusable-release-please.yaml",
-      "target": ".github/workflows/reusable-release-please.yaml"
-    },
-    {
-      "source": ".github/workflows/reusable-scorecard.yaml",
-      "target": ".github/workflows/reusable-scorecard.yaml"
-    },
-    {
-      "source": ".github/workflows/security.yaml",
-      "target": ".github/workflows/security.yaml"
-    },
-    {
       "source": ".gitignore",
       "target": ".gitignore"
-    },
-    {
-      "source": ".markdownlint-cli2.jsonc",
-      "target": ".markdownlint-cli2.jsonc"
-    },
-    {
-      "source": ".pre-commit-config.yaml",
-      "target": ".pre-commit-config.yaml"
-    },
-    {
-      "source": "LICENSE",
-      "target": "LICENSE"
     },
     {
       "source": "Makefile",
       "target": "Makefile"
     },
     {
-      "source": "docs/decision-records/template/0001-pin-packer-and-plugin-versions-exactly.md",
-      "target": "docs/decision-records/template/0001-pin-packer-and-plugin-versions-exactly.md"
-    },
-    {
-      "source": "docs/decision-records/template/0002-keep-reference-framework-credential-free.md",
-      "target": "docs/decision-records/template/0002-keep-reference-framework-credential-free.md"
-    },
-    {
-      "source": "docs/decision-records/template/0004-isolate-pull-request-target-triggers.md",
-      "target": "docs/decision-records/template/0004-isolate-pull-request-target-triggers.md"
-    },
-    {
-      "source": "docs/decision-records/template/0005-define-data-only-packer-runner-repositories.md",
-      "target": "docs/decision-records/template/0005-define-data-only-packer-runner-repositories.md"
-    },
-    {
-      "source": "docs/decision-records/template/README.md",
-      "target": "docs/decision-records/template/README.md"
-    },
-    {
-      "source": "docs/how-to/vendor-packer-plugins.md",
-      "target": "docs/how-to/vendor-packer-plugins.md"
+      "source": "baseline-manifest.json",
+      "target": "baseline-manifest.json"
     },
     {
       "source": "docs/reference/invariants.md",
       "target": "docs/reference/invariants.md"
-    },
-    {
-      "source": "docs/reference/mirroring.md",
-      "target": "docs/reference/mirroring.md"
     },
     {
       "source": "docs/reference/quality-gates.md",
@@ -120,188 +74,6 @@
     {
       "source": "docs/reference/release-gates.md",
       "target": "docs/reference/release-gates.md"
-    },
-    {
-      "source": "docs/reference/runner-protocol.md",
-      "target": "docs/reference/runner-protocol.md"
-    },
-    {
-      "source": "fixtures/integration/reference/README.md",
-      "target": "fixtures/integration/reference/README.md"
-    },
-    {
-      "source": "packer/fixtures/runtime/.gitkeep",
-      "target": "packer/fixtures/runtime/.gitkeep"
-    },
-    {
-      "source": "packer/fixtures/runtime/README.md",
-      "target": "packer/fixtures/runtime/README.md"
-    },
-    {
-      "source": "packer/repos/.gitkeep",
-      "target": "packer/repos/.gitkeep"
-    },
-    {
-      "source": "packer/repos/README.md",
-      "target": "packer/repos/README.md"
-    },
-    {
-      "source": "policies/opa/packer_artifact.rego",
-      "target": "policies/opa/packer_artifact.rego"
-    },
-    {
-      "source": "policies/opa/packer_artifact_test.rego",
-      "target": "policies/opa/packer_artifact_test.rego"
-    },
-    {
-      "source": "policies/opa/repo_hygiene.rego",
-      "target": "policies/opa/repo_hygiene.rego"
-    },
-    {
-      "source": "policies/opa/repo_hygiene_test.rego",
-      "target": "policies/opa/repo_hygiene_test.rego"
-    },
-    {
-      "source": "tests/ci/apply_overlay.bats",
-      "target": "tests/ci/apply_overlay.bats"
-    },
-    {
-      "source": "tests/ci/check_workflow_run_inputs.bats",
-      "target": "tests/ci/check_workflow_run_inputs.bats"
-    },
-    {
-      "source": "tests/ci/packer_var_file_args.bats",
-      "target": "tests/ci/packer_var_file_args.bats"
-    },
-    {
-      "source": "tests/ci/validate_framework_ref.bats",
-      "target": "tests/ci/validate_framework_ref.bats"
-    },
-    {
-      "source": "tests/ci/validate_input_ref.bats",
-      "target": "tests/ci/validate_input_ref.bats"
-    },
-    {
-      "source": "tests/fixtures/privileged-workflows/bad/.github/workflows/auto-merge.yaml",
-      "target": "tests/fixtures/privileged-workflows/bad/.github/workflows/auto-merge.yaml"
-    },
-    {
-      "source": "tests/fixtures/privileged-workflows/good/.github/workflows/auto-merge.yaml",
-      "target": "tests/fixtures/privileged-workflows/good/.github/workflows/auto-merge.yaml"
-    },
-    {
-      "source": "tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/caller.yaml",
-      "target": "tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/caller.yaml"
-    },
-    {
-      "source": "tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/reusable-pwn.yaml",
-      "target": "tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/reusable-pwn.yaml"
-    },
-    {
-      "source": "tests/fixtures/render-golden/minimal/expected/build-context.json",
-      "target": "tests/fixtures/render-golden/minimal/expected/build-context.json"
-    },
-    {
-      "source": "tests/fixtures/render-golden/minimal/expected/builder-contract.json",
-      "target": "tests/fixtures/render-golden/minimal/expected/builder-contract.json"
-    },
-    {
-      "source": "tests/fixtures/render-golden/minimal/request.json",
-      "target": "tests/fixtures/render-golden/minimal/request.json"
-    },
-    {
-      "source": "tools/build_opa_input.py",
-      "target": "tools/build_opa_input.py"
-    },
-    {
-      "source": "tools/build_packer_artifact_input.py",
-      "target": "tools/build_packer_artifact_input.py"
-    },
-    {
-      "source": "tools/check_adr_schema.py",
-      "target": "tools/check_adr_schema.py"
-    },
-    {
-      "source": "tools/check_baseline_manifest.py",
-      "target": "tools/check_baseline_manifest.py"
-    },
-    {
-      "source": "tools/check_docs_layout.py",
-      "target": "tools/check_docs_layout.py"
-    },
-    {
-      "source": "tools/check_packer_plugin_provenance.py",
-      "target": "tools/check_packer_plugin_provenance.py"
-    },
-    {
-      "source": "tools/check_privileged_workflows.py",
-      "target": "tools/check_privileged_workflows.py"
-    },
-    {
-      "source": "tools/ci/_config.py",
-      "target": "tools/ci/_config.py"
-    },
-    {
-      "source": "tools/ci/apply_overlay.sh",
-      "target": "tools/ci/apply_overlay.sh"
-    },
-    {
-      "source": "tools/ci/check_workflow_run_inputs.py",
-      "target": "tools/ci/check_workflow_run_inputs.py"
-    },
-    {
-      "source": "tools/ci/config.toml",
-      "target": "tools/ci/config.toml"
-    },
-    {
-      "source": "tools/ci/packer_var_file_args.sh",
-      "target": "tools/ci/packer_var_file_args.sh"
-    },
-    {
-      "source": "tools/ci/run_integration.py",
-      "target": "tools/ci/run_integration.py"
-    },
-    {
-      "source": "tools/ci/validate_framework_ref.sh",
-      "target": "tools/ci/validate_framework_ref.sh"
-    },
-    {
-      "source": "tools/ci/validate_input_ref.sh",
-      "target": "tools/ci/validate_input_ref.sh"
-    },
-    {
-      "source": "tools/gen_packer_docs.py",
-      "target": "tools/gen_packer_docs.py"
-    },
-    {
-      "source": "tools/install_ci_tools.sh",
-      "target": "tools/install_ci_tools.sh"
-    },
-    {
-      "source": "tools/render_reference_build.py",
-      "target": "tools/render_reference_build.py"
-    },
-    {
-      "source": "tools/run_privileged_workflow_tests.py",
-      "target": "tools/run_privileged_workflow_tests.py"
-    },
-    {
-      "source": "tools/test_packer_variable_validation.py",
-      "target": "tools/test_packer_variable_validation.py"
-    },
-    {
-      "source": "tools/test_render_reference_build.py",
-      "target": "tools/test_render_reference_build.py"
-    },
-    {
-      "source": "tools/verify.py",
-      "target": "tools/verify.py"
-    }
-  ],
-  "scaffold_starter": [
-    {
-      "source": "baseline-manifest.json",
-      "target": "baseline-manifest.json"
     }
   ]
 }
