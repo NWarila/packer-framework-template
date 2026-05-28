@@ -2,24 +2,8 @@
   "version": "2",
   "byte_identical": [
     {
-      "source": ".editorconfig",
-      "target": ".editorconfig"
-    },
-    {
-      "source": ".gitattributes",
-      "target": ".gitattributes"
-    },
-    {
       "source": ".github/workflows/security.yaml",
       "target": ".github/workflows/security.yaml"
-    },
-    {
-      "source": ".markdownlint-cli2.jsonc",
-      "target": ".markdownlint-cli2.jsonc"
-    },
-    {
-      "source": ".pre-commit-config.yaml",
-      "target": ".pre-commit-config.yaml"
     },
     {
       "source": "docs/reference/mirroring.md",
@@ -40,6 +24,14 @@
   ],
   "scaffold_starter": [
     {
+      "source": ".editorconfig",
+      "target": ".editorconfig"
+    },
+    {
+      "source": ".gitattributes",
+      "target": ".gitattributes"
+    },
+    {
       "source": ".github/CODEOWNERS",
       "target": ".github/CODEOWNERS"
     },
@@ -54,6 +46,14 @@
     {
       "source": ".gitignore",
       "target": ".gitignore"
+    },
+    {
+      "source": ".markdownlint-cli2.jsonc",
+      "target": ".markdownlint-cli2.jsonc"
+    },
+    {
+      "source": ".pre-commit-config.yaml",
+      "target": ".pre-commit-config.yaml"
     },
     {
       "source": "Makefile",
