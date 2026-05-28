@@ -22,4 +22,4 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
-    uses: ./.github/workflows/reusable-auto-merge.yaml
+    uses: NWarila/.github/.github/workflows/reusable-auto-merge.yaml@e7456b0219e8750fbef8bd70a0f1ccf7d47f1c20

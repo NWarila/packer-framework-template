@@ -29,13 +29,8 @@
 !/.github/workflows/ci.yaml
 !/.github/workflows/drift-gate.yaml
 !/.github/workflows/release.yaml
-!/.github/workflows/reusable-auto-merge.yaml
-!/.github/workflows/reusable-codeql.yaml
-!/.github/workflows/reusable-iac-security.yaml
 !/.github/workflows/reusable-packer-framework-build.yaml
 !/.github/workflows/reusable-release-evidence.yaml
-!/.github/workflows/reusable-release-please.yaml
-!/.github/workflows/reusable-scorecard.yaml
 !/.github/workflows/security.yaml
 
 !/docs/
