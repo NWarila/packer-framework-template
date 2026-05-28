@@ -1,5 +1,9 @@
 # packer-framework-template
 
+[![CI](https://github.com/NWarila/packer-framework-template/actions/workflows/ci.yaml/badge.svg)](https://github.com/NWarila/packer-framework-template/actions/workflows/ci.yaml)
+[![Security](https://github.com/NWarila/packer-framework-template/actions/workflows/security.yaml/badge.svg)](https://github.com/NWarila/packer-framework-template/actions/workflows/security.yaml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 Reference template for building Packer framework repositories: repos that own a reusable image-building contract, validation tooling, and release evidence. It is not a Packer runner template; runner repositories own scheduling, promotion, environment approvals, and provider-specific publish behavior.
 
 This template is intentionally credential-free. It uses Packer's `file` builder to prove that rendered installer content is consumed by a build without touching a hypervisor, cloud account, ISO store, or secret. Real frameworks, such as `nwarila-platform/proxmox-packer-framework`, replace the source block and provider-specific variables while keeping the same repo-quality surface.
