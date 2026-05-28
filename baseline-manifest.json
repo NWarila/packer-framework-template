@@ -12,14 +12,6 @@
     {
       "source": "docs/reference/runner-protocol.md",
       "target": "docs/reference/runner-protocol.md"
-    },
-    {
-      "source": "tools/check_docs_layout.py",
-      "target": "tools/check_docs_layout.py"
-    },
-    {
-      "source": "tools/install_ci_tools.sh",
-      "target": "tools/install_ci_tools.sh"
     }
   ],
   "scaffold_starter": [
@@ -74,6 +66,14 @@
     {
       "source": "docs/reference/release-gates.md",
       "target": "docs/reference/release-gates.md"
+    },
+    {
+      "source": "tools/check_docs_layout.py",
+      "target": "tools/check_docs_layout.py"
+    },
+    {
+      "source": "tools/install_ci_tools.sh",
+      "target": "tools/install_ci_tools.sh"
     }
   ]
 }
