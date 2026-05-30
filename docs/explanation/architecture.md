@@ -8,7 +8,7 @@ The template owns:
 
 - A complete credential-free Packer framework under [`packer/`](../../packer/) that demonstrates the image contract without touching a hypervisor, cloud account, ISO library, or artifact registry.
 - Linux and Windows example inputs under [`examples/`](../../examples/) that exercise the install-template contract for both cloud-init and Autounattend-style content.
-- Universal reusable workflows for CodeQL, Scorecard, IaC/security scanning, Packer framework build validation, release-please, release evidence, and trusted-bot auto-merge.
+- Two type-specific reusable workflows it owns locally: the Packer framework build validator (`reusable-packer-framework-build.yaml`) and release-evidence generation (`reusable-release-evidence.yaml`). The universal CI/security/release workflows (CodeQL, Scorecard, IaC/security scanning, release-please, trusted-bot auto-merge) are **called** by SHA from `NWarila/.github`, not owned here.
 - A template-tier `baseline-manifest.json` that tells derivative frameworks which repo-hygiene files should stay byte-identical.
 - Framework-template ADRs under [`docs/decision-records/template/`](../decision-records/template/) that explain shared Packer framework decisions.
 - The normalized verification entrypoint, [`tools/verify.py`](../../tools/verify.py), used by local developers and CI.
