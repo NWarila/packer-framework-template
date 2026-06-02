@@ -18,7 +18,7 @@ Open an issue using the **Documentation** template with the page or section that
 
 ### Asking questions
 
-Use [Discussions](https://github.com/NWarila/.github/discussions) for questions, ideas, and general conversation. Issues are for actionable work.
+Open an issue on the [Issues](https://github.com/NWarila/.github/issues/new/choose) tab for questions, ideas, and general conversation; choose the template that best fits, or use the closest one if none matches exactly. For security-sensitive questions, use the private channel described below instead.
 
 ### Reporting security vulnerabilities
 
