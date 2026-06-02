@@ -163,10 +163,25 @@
 !/tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/caller.yaml
 !/tests/fixtures/privileged-workflows/reusable-bad/.github/workflows/reusable-pwn.yaml
 
-# Renderer golden fixtures (Implementation Phase 4)
+# Renderer golden fixtures
 !/tests/fixtures/render-golden/
 !/tests/fixtures/render-golden/minimal/
 !/tests/fixtures/render-golden/minimal/request.json
 !/tests/fixtures/render-golden/minimal/expected/
 !/tests/fixtures/render-golden/minimal/expected/build-context.json
 !/tests/fixtures/render-golden/minimal/expected/builder-contract.json
+!/docs/decision-records/org/0006-keep-github-control-planes-namespace-local.md
+!/docs/decision-records/org/0007-centralize-universal-ci-reusables-within-each-namespace.md
+!/docs/decision-records/org/0008-enforce-repo-hygiene-by-repo-type.md
+!/docs/decision-records/org/0010-keep-ai-attribution-out-of-version-control.md
+!/docs/decision-records/org/0009-classify-baseline-manifest-byte-identity.md
+!/.github/workflows/org-adr-sync.yaml
+!/.github/workflows/org-adr-auto-sync.yaml
+!/docs/reference/diagram-conventions.md
+!/docs/reference/alignment-program-lessons.md
+!/docs/reference/ci-alignment-design-intent.md
+!/docs/reference/ci-validator-invocation.md
+!/docs/explanation/repo-type-taxonomy-and-ci-focus.md
+!/docs/diagrams/.gitkeep
+!/docs/runbooks/.gitkeep
+!/docs/runbooks/purge-ai-attributed-history.md
