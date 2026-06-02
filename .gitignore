@@ -183,5 +183,8 @@
 !/docs/reference/ci-validator-invocation.md
 !/docs/explanation/repo-type-taxonomy-and-ci-focus.md
 !/docs/diagrams/.gitkeep
+!/docs/diagrams/architecture.mmd
+!/docs/tutorials/derive-your-first-packer-framework.md
+!/docs/decision-records/repo/0001-use-credential-free-file-builder-for-reference-validation.md
 !/docs/runbooks/.gitkeep
 !/docs/runbooks/purge-ai-attributed-history.md
