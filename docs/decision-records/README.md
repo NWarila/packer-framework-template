@@ -4,7 +4,7 @@ This directory holds the Architecture Decision Records (ADRs) governing this Pac
 
 - `org/` - byte-identical mirrors of org-baseline ADRs from [`NWarila/.github`](https://github.com/NWarila/.github). These apply to every repo in the org regardless of stack.
 - `template/` - Packer-framework-template ADRs owned by this repository. Derivative frameworks mirror the `byte_identical` baseline entries through `baseline-manifest.json`.
-- `repo/` - repository-specific ADRs for this repository only. This scope is currently empty.
+- `repo/` - repository-specific ADRs for this repository only.
 
 `packer-framework-template` is itself a type-template: it owns the canonical framework command surface, Packer image layout, validation tooling, reusable build workflow, and framework-tier decisions that derivative Packer framework repositories inherit.
 
@@ -36,4 +36,8 @@ The `org/` scope is mirrored from `NWarila/.github` and enforced by the org drif
 | [ADR-0004](org/0004-use-renovate-for-dependency-updates.md) | Accepted | Use Renovate for dependency updates. |
 | [ADR-0005](org/0005-pin-terraform-and-provider-versions-exactly.md) | Accepted | Pin Terraform and provider versions exactly. |
 
-The `.gitkeep` placeholder in `repo/` keeps the directory skeleton complete until this repository has a repo-specific ADR.
+## Repo ADRs
+
+| ADR | Status | Decision |
+| --- | --- | --- |
+| [ADR-repo/0001](repo/0001-use-credential-free-file-builder-for-reference-validation.md) | Accepted | Use the credential-free `file` builder for reference validation so CI requires no provider credentials. |

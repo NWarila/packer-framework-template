@@ -1,0 +1,29 @@
+C4Context
+  title System Context: Packer Framework Template
+
+  Person(maintainer, "Framework Maintainer", "Derives and maintains real Packer frameworks from this template.")
+
+  System_Boundary(controlPlane, "Control Plane (NWarila/.github)") {
+    System(orgWorkflows, "Org Reusable Workflows", "Universal CI, CodeQL, Scorecard, IaC scan, release-please, auto-merge reusables called by SHA.")
+    System(orgADRs, "Org ADR Masters", "Canonical org-tier decision records mirrored into each repo's docs/decision-records/org/.")
+  }
+
+  System_Boundary(framework, "Packer Framework Template (this repo)") {
+    System(packerLayer, "Packer Layer", "packer.pkr.hcl, variables.pkr.hcl, locals.pkr.hcl, source.pkr.hcl (credential-free file builder), builds.pkr.hcl.")
+    System(ciLayer, "CI and Validation Layer", "tools/verify.py, OPA policy, actionlint, reusable-packer-framework-build.yaml, reusable-release-evidence.yaml.")
+    System(docsLayer, "Documentation Layer", "Diataxis quadrants, ADRs (org + template + repo tiers), diagram source files.")
+  }
+
+  System_Boundary(runner, "Runner Repository") {
+    System(runnerRepo, "Packer Runner", "Owns scheduling, promotion, environment approvals, and provider-specific publish behavior. Calls the framework by pinned SHA.")
+  }
+
+  System_Boundary(consumer, "Derivative Framework") {
+    System(derivedFramework, "Real Packer Framework", "Replaces source.pkr.hcl with a provider-specific builder (Proxmox, VMware, AWS, etc.) while inheriting the repo-quality surface.")
+  }
+
+  Rel(maintainer, framework, "Derives, validates, and publishes")
+  Rel(controlPlane, framework, "Provides reusable workflows and ADR masters via SHA-pinned refs")
+  Rel(framework, runner, "Exposes reusable-packer-framework-build.yaml; runner calls by SHA with overlay + var-files")
+  Rel(framework, consumer, "Serves as derivation source; consumer replaces source block")
+  Rel(runner, derivedFramework, "Pins and calls derived framework via reusable-packer-framework-build.yaml")
