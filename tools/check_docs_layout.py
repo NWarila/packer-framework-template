@@ -17,6 +17,7 @@ ALLOWED_SUBTREES = {
     DOCS / "tutorials",
     DOCS / "how-to",
     DOCS / "reference",
+    DOCS / "runbooks",
     DOCS / "explanation",
     DOCS / "decision-records",
 }
