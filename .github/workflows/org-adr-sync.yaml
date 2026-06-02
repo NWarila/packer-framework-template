@@ -1,0 +1,32 @@
+﻿name: Org ADR Sync
+
+on:
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+concurrency:
+  group: org-adr-sync-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  baseline:
+    name: org-adr / verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Drift gate (org ADR baseline)
+        # renovate: datasource=git-refs depName=NWarila/drift-gate
+        uses: NWarila/drift-gate@dac07c2b2a30a084b3577d4712549291ae99879c
+        with:
+          source-repo: NWarila/.github
+          # renovate: depName=NWarila/.github packageName=NWarila/.github
+          source-ref: e8bc517828a9915a401096305124dff316b76644
+          manifest: org-adr-manifest.json
+          check-name: org-adr / verify

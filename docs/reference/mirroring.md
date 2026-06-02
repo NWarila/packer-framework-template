@@ -1,41 +1,59 @@
-# Mirroring And Consumer Baseline
+# Mirroring Reference
 
-This template is intentionally split into shared repo-quality baseline and Packer implementation layers so derivative image frameworks can stay easy to adapt without losing platform controls.
+This reference describes how inherited files move from control-plane and template repositories into adopting repositories. It is governed by [ADR-0001](../decision-records/0001-use-architecture-decision-records.md), [ADR-0006](../decision-records/0006-keep-github-control-planes-namespace-local.md), and [ADR-0009](../decision-records/0009-classify-baseline-manifest-byte-identity.md).
 
-## Required Shared Baseline
+## Core Rule
 
-Derivative Packer frameworks should mirror the files listed under
-`byte_identical` in this template's `baseline-manifest.json`. In a consumer,
-the authoritative check is the Drift Gate workflow pointed at this template's
-manifest; the consumer does not need its own copy of `baseline-manifest.json`
-unless it is also publishing a downstream template.
+Consumers mirror what they inherit as governance or directly run in their own lifecycle. Templates keep files that only templates run. Repo-specific material stays local to the repository that owns it.
 
-That mirrored set is intentionally small: the shared security caller and the
-reference docs that define the mirroring and runner protocol contracts. Local
-verification entrypoints, OPA policies, and richer repository-specific config
-belong to the repo that actually runs them.
+## Source Classes
 
-Use `byte_identical` only for files a downstream framework should keep byte-for-byte with this template. Use `scaffold_starter` for examples, fixtures, and implementation seeds that demonstrate the pattern but are expected to change in a real framework.
+| Source class | Master location | Consumer location | Byte identity |
+| ------------ | --------------- | ----------------- | ------------- |
+| Org ADRs | Owning namespace `.github/docs/decision-records/` | `docs/decision-records/org/` | Yes |
+| Org community files | Owning namespace `.github` | Repository root or `.github/` | Yes when uniform |
+| Type-template ADRs | Type template `docs/decision-records/template/` | `docs/decision-records/template/` | Yes |
+| Type-specific reusable workflows | Type template `.github/workflows/` | Called by `uses:` or mirrored only when directly run | Depends on contract |
+| Universal org reusable workflows | Owning namespace `.github/.github/workflows/` | Called by SHA-pinned thin callers | No local body copy |
+| Repo-specific ADRs | Owning repository `docs/decision-records/repo/` | Not mirrored | No |
+| Repo-specific docs and diagrams | Owning repository `docs/` | Not mirrored | No |
 
-The manifest is intentionally narrower than a full repo copy. It does not require downstream frameworks to keep the reference `file` source or the starter examples byte-identical.
+## Namespace Rule
 
-## Framework-Owned Layer
+Org governance is namespace-local. A `NWarila/*` repository mirrors org ADRs and community files from `NWarila/.github`. A repository under another namespace mirrors the same categories from that namespace's `.github` control plane. Cross-namespace references remain valid for explicit type-template or tool dependencies, but not for org-control-plane governance.
 
-The `packer/` implementation, examples, provider choices, and repo-tier ADRs are allowed to diverge. This reference uses the `file` builder so the pattern is visible without infrastructure while still consuming rendered installer content; real frameworks replace that source with provider-specific builders while preserving the same validation interface.
+## Org ADR Auto-Sync
 
-## Optional Release Layer
+Repositories that already mirror org ADRs should carry a scheduled caller for the namespace-local `reusable-org-adr-auto-sync.yaml`. The caller runs from the adopting repository, so its sync token can only update that repository. It fetches the owning namespace `.github` `org-adr-manifest.json`, copies only `docs/decision-records/org/` targets, removes stale mirrored ADR Markdown files, updates the adopting repository's ADR-only detector source pin when present, and opens or refreshes a PR.
 
-`release.yaml`, release-please config, release evidence, and trusted-bot auto-merge are supported by this template, but downstream frameworks do not have to mirror them byte-for-byte. Keep that layer when the repo publishes versioned releases or framework evidence. Drop it when the repo is only a private implementation detail.
+The reusable keeps `GITHUB_TOKEN` read-only. Real sync writes require the caller to pass an explicit `sync_token` secret with permission to push the sync branch and open the PR.
 
-Push-triggered release-please is opt-in through `RELEASE_PLEASE_ON_PUSH=true` because GitHub requires an explicit repository setting before Actions can create release PRs.
+This auto-sync supplements the drift-gate detector; it does not replace review. The detector stays responsible for byte-identity verification, while the auto-sync keeps the repair path small and namespace-scoped.
 
-## New Framework Checklist
+## Byte-Identity Rule
 
-1. Rewrite `README.md` for the real framework.
-2. Replace the `file` source under `packer/`.
-3. Update examples for supported guest OS families.
-4. Add provider-specific threat model notes under `docs/explanation/`.
-5. Decide whether to keep the optional release layer.
-6. Run the repository's local validation entrypoint. For this template, that is
-   `python tools/verify.py verify`; for a consumer, use its documented CI or
-   contract-check command.
+Use byte identity when local edits would be drift. Do not use byte identity when local edits would be maturity.
+
+Byte-identical entries are appropriate for:
+
+- Org ADR mirrors.
+- Shared community-health files.
+- Stable org reference documents that are intentionally inherited.
+- Skeleton sentinels that preserve expected directories.
+
+Starter, scaffold, existence, or local entries are appropriate for:
+
+- Repo-customizable lint, hook, editor, or documentation configuration.
+- Workflow callers that embed namespace-specific `.github` paths across a multi-namespace target set.
+- Template-internal tools, tests, fixtures, and policies that consumers do not run.
+- Repo-specific diagrams, inventories, runtime evidence, and runbooks.
+
+## Review Checklist
+
+- Does the target repository inherit or run this file?
+- Would a local improvement be drift or maturity?
+- Does the file embed a namespace, repository name, branch, environment, or runtime-specific value?
+- Is the source an org control plane, a type template, or the repository itself?
+- Is the file body needed locally, or should the repository call it by `uses:`?
+
+When the answer is unclear, prefer a smaller byte-identical manifest and a separate starter or reference entry.

@@ -1,19 +1,24 @@
 # ADR-0002: Adopt Diátaxis as the Documentation Framework
 
-| Field          | Value                                    |
-| -------------- | ---------------------------------------- |
-| Status         | Accepted                                 |
-| Date           | 2026-04-24                               |
-| Authors        | Nick Warila (@NWarila)                   |
-| Decision-maker | Nick Warila (sole portfolio maintainer)  |
-| Consulted      | None.                                    |
-| Informed       | None.                                    |
-| Reversibility  | Medium                                   |
-| Review-by      | N/A (Accepted)                           |
+| Field            | Value                                                                     |
+| ---------------- | ------------------------------------------------------------------------- |
+| ID               | ADR-0002                                                                  |
+| Scope            | Org baseline                                                              |
+| Status           | Accepted                                                                  |
+| Decision-subject | Non-ADR documentation layout and supported documentation genres.          |
+| Date accepted    | 2026-04-24                                                                |
+| Date             | 2026-06-02                                                                |
+| Last reviewed    | 2026-06-02                                                                |
+| Authors          | Nick Warila (@NWarila)                                                    |
+| Decision-makers  | Nick Warila (sole portfolio maintainer)                                   |
+| Consulted        | Documentation-governance migration findings.                              |
+| Informed         | Maintainers of repositories adopting the org documentation baseline.       |
+| Reversibility    | Medium                                                                    |
+| Review-by        | 2026-11-29                                                                |
 
 ## TL;DR
 
-We will use the [Diátaxis](https://diataxis.fr) documentation framework for all non-ADR documentation in repositories that adopt this baseline. Each adopting repository organizes long-form documentation into the four Diátaxis quadrants — **tutorials**, **how-to guides**, **reference**, and **explanation** — under a `docs/` directory whose immediate subdirectories mirror those quadrant names. ADRs themselves remain governed by [ADR-0001](0001-use-architecture-decision-records.md) and live in their own subtree at `docs/decision-records/{org,template,repo}/` (org-mirrored, template-mirrored, or repository-specific). This gives every repository a consistent, reader-first information architecture that is easy to navigate, easy to maintain, and easy for new contributors to understand.
+We will use the [Diátaxis](https://diataxis.fr) documentation framework for all non-ADR documentation in repositories that adopt this baseline. Each adopting repository organizes long-form documentation into the four Diátaxis quadrants — **tutorials**, **how-to guides**, **reference**, and **explanation** — under a `docs/` directory whose immediate subdirectories mirror those quadrant names. The baseline also recognizes two top-level adjunct genres that Diátaxis does not cleanly house on its own: `docs/diagrams/` for diagram source files and `docs/runbooks/` for operator or break-glass procedures. ADRs themselves remain governed by [ADR-0001](0001-use-architecture-decision-records.md) and live in their own subtree at `docs/decision-records/{org,template,repo}/` (org-mirrored, template-mirrored, or repository-specific). This gives every repository a consistent, reader-first information architecture that is easy to navigate, easy to maintain, and easy for new contributors to understand.
 
 ## Context and Problem Statement
 
@@ -57,11 +62,16 @@ Chosen option: **Option 5, Diátaxis.**
 
 In a repository that adopts this baseline, all non-ADR documentation lives under `docs/` with subdirectories named exactly `tutorials/`, `how-to/`, `reference/`, and `explanation/`. Every Markdown file under those four subdirectories (other than an index `README.md`) lives in exactly one of them and is authored to one Diátaxis purpose. ADRs live in their own sibling subtree at `docs/decision-records/{org,template,repo}/` as established by ADR-0001 and are not subject to the Diátaxis quadrant rule.
 
-A repository is not required to populate every quadrant. A repository that has no learning-oriented onboarding need not create `docs/tutorials/`. A repository may begin by populating only the quadrants that solve current pain (commonly `docs/reference/` and `docs/how-to/`) and grow into the others over time. A repository's `docs/README.md` MAY serve as the index across populated quadrants and SHOULD label each linked document with its quadrant.
+Two additional top-level subtrees are sanctioned because they are structural support genres rather than Diátaxis quadrants:
 
-Composite operational documents — runbooks, troubleshooting guides, and other artifacts that combine reference, procedural, and explanatory content by necessity — are treated as belonging to the **how-to** quadrant when their primary purpose is to walk an operator through a goal-directed task, and to the **reference** quadrant when their primary purpose is lookup. Composite documents MUST use explicit second-level section headings labelled with the quadrant they touch (`## Reference`, `## How to ...`, `## Why ...`) so readers can predict where the lookup material ends and the procedural material begins. Composite documents are an explicit accommodation of operational reality and are not an exception that is allowed to expand silently into general non-operational docs.
+- `docs/diagrams/` contains diagram-as-code source files. Mermaid `.mmd` is the org baseline format. Diátaxis pages MAY embed a rendered Mermaid copy inline for reader ergonomics, but the matching `.mmd` file is the source of truth and the page MUST link to it.
+- `docs/runbooks/` contains operator-facing procedures, including break-glass and recovery procedures. Runbooks may combine reference, procedure, verification, rollback, and troubleshooting because their primary reader is an operator completing or recovering a real action.
 
-The directory name `docs/` is preferred over alternatives such as `documentation/` or `book/` for terseness and broad community familiarity. The subdirectory names match Diátaxis terminology exactly: `tutorials`, `how-to`, `reference`, `explanation`. Plural for `tutorials` matches Diátaxis usage. Hyphenated `how-to` matches Diátaxis usage and avoids an awkward `how_to` or `howto`. The plural `references` is explicitly avoided because Diátaxis uses the mass noun `reference`.
+A repository is not required to populate every quadrant or adjunct genre. A repository that has no learning-oriented onboarding need not create tutorial content, and a repository with no diagrams or operator procedures may keep `docs/diagrams/` and `docs/runbooks/` empty. Empty subtrees are kept visible with `.gitkeep` sentinels when they are part of a shared baseline.
+
+Composite operational documents are treated as `docs/runbooks/` when their primary purpose is operator execution or recovery. Troubleshooting material belongs in `docs/runbooks/` when it guides an operator through recovery, and in `docs/reference/` when its primary purpose is lookup. Composite documents MUST use explicit second-level section headings such as `## Purpose`, `## Prerequisites`, `## Procedure`, `## Verification`, `## Rollback`, and `## Troubleshooting` so readers can predict where lookup material ends and procedural material begins. Composite documents are an explicit accommodation of operational reality and are not an exception that is allowed to expand silently into general non-operational docs.
+
+The directory name `docs/` is preferred over alternatives such as `documentation/` or `book/` for terseness and broad community familiarity. The subdirectory names match Diátaxis terminology exactly: `tutorials`, `how-to`, `reference`, `explanation`. Plural for `tutorials` matches Diátaxis usage. Hyphenated `how-to` matches Diátaxis usage and avoids an awkward `how_to` or `howto`. The plural `references` is explicitly avoided because Diátaxis uses the mass noun `reference`. The adjunct names `diagrams` and `runbooks` are reserved top-level names under `docs/`.
 
 ## Pros and Cons of the Options
 
@@ -122,12 +132,13 @@ The directory name `docs/` is preferred over alternatives such as `documentation
 
 Adherence to this ADR is confirmed by the following mechanisms. The wording `MUST`, `SHOULD`, and `MAY` follows [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) conventions.
 
-1. **Layout check.** A repository that adopts this baseline MUST place all non-ADR documentation under `docs/`. Where any quadrant is populated, it MUST be in a top-level subdirectory named exactly `tutorials`, `how-to`, `reference`, or `explanation`. A CI script or `pre-commit` hook MAY fail a pull request that adds a Markdown file under `docs/` outside one of the four quadrant subdirectories.
-2. **Layout-skeleton check.** Every adopting repository MUST contain all four quadrant directories — `docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/` — even when some are empty. Empty quadrants are kept in source control via byte-identical `.gitkeep` placeholders mirrored from the org canonical, so a reader scanning any repo immediately sees the same predictable layout. *Content* in each quadrant remains opt-in (a repo with no learning-oriented onboarding has an empty `tutorials/`); only the *layout* is mandatory.
-3. **Quadrant-purity check.** Each non-composite document under `docs/` SHOULD address exactly one Diátaxis quadrant. Composite operational documents (runbooks, troubleshooting guides) MAY span quadrants but MUST mark each section with its quadrant via an explicit second-level heading (`## Reference`, `## How to ...`, `## Why ...`).
-4. **Index check.** A repository's `docs/README.md`, if present, SHOULD link to every populated quadrant and SHOULD label each linked document with the quadrant it belongs to. A CI script MAY diff the directory listing against the index and fail on drift.
-5. **Co-existence check.** ADRs live at `docs/decision-records/{org,template,repo}/` (a sibling subtree, not a Diátaxis quadrant) and are not subject to the quadrant rule. A pull request that misfiles an ADR under one of the four quadrant directories SHOULD be rejected with a pointer to ADR-0001.
-6. **Editorial rule.** After acceptance of this ADR, document re-shelving (moving an existing doc into the appropriate quadrant) is editorial, not architectural; it does not require its own ADR. A material *change* to the framework choice — adopting a different framework, abandoning Diátaxis, or extending the quadrant taxonomy — does require a superseding ADR.
+1. **Layout check.** A repository that adopts this baseline MUST place all non-ADR documentation under `docs/`. Markdown under `docs/` MUST be in a top-level subdirectory named exactly `tutorials`, `how-to`, `reference`, `explanation`, `runbooks`, or `decision-records`. Diagram source files MUST be in `docs/diagrams/`. A CI script or `pre-commit` hook MAY fail a pull request that adds a file under `docs/` outside the sanctioned subtrees.
+2. **Layout-skeleton check.** Every adopting repository MUST contain the four quadrant directories — `docs/tutorials/`, `docs/how-to/`, `docs/reference/`, `docs/explanation/` — plus `docs/diagrams/` and `docs/runbooks/`, even when some are empty. Empty subtrees are kept in source control via byte-identical `.gitkeep` placeholders mirrored from the org canonical, so a reader scanning any repo immediately sees the same predictable layout. *Content* in each subtree remains opt-in; only the *layout* is mandatory.
+3. **Quadrant-purity check.** Each non-composite document under `docs/` SHOULD address exactly one Diátaxis quadrant. Composite operational documents belong in `docs/runbooks/` when their primary purpose is operator execution or recovery.
+4. **Diagram source check.** Mermaid `.mmd` files under `docs/diagrams/` are source of truth. Markdown pages that embed those diagrams inline SHOULD link to the matching `.mmd` source immediately before or after the embedded diagram.
+5. **Index check.** A repository's `docs/README.md`, if present, SHOULD link to every populated quadrant and adjunct genre and SHOULD label each linked document with its purpose. A CI script MAY diff the directory listing against the index and fail on drift.
+6. **Co-existence check.** ADRs live at `docs/decision-records/{org,template,repo}/` (a sibling subtree, not a Diátaxis quadrant) and are not subject to the quadrant rule. A pull request that misfiles an ADR under one of the content directories SHOULD be rejected with a pointer to ADR-0001.
+7. **Editorial rule.** After acceptance of this ADR, document re-shelving (moving an existing doc into the appropriate quadrant or sanctioned adjunct subtree) is editorial, not architectural; it does not require its own ADR. A material *change* to the framework choice — adopting a different framework, abandoning Diátaxis, or extending the top-level documentation taxonomy beyond `diagrams` and `runbooks` — requires an in-place update to this ADR when the decision subject remains documentation layout, or a superseding ADR when a different subject replaces it.
 
 Enforcement tooling is recommended but not mandatory at acceptance time. A solo-maintainer repository MAY rely on manual discipline; a team repository SHOULD automate at least the layout and index checks.
 
@@ -140,6 +151,7 @@ Enforcement tooling is recommended but not mandatory at acceptance time. A solo-
 - Authoring decisions reduce to a one-step quadrant classification rather than open-ended structural design.
 - Drift between reference, procedural, and conceptual material becomes harder, because each document has a single declared purpose.
 - The choice carries community recognition: external readers, contributors, and hiring audiences encounter a framework they likely already know.
+- Diagram and runbook material now has a sanctioned home instead of being forced into a quadrant that does not match its reader need.
 
 ### Negative
 
@@ -149,7 +161,7 @@ Enforcement tooling is recommended but not mandatory at acceptance time. A solo-
 
 ### Neutral
 
-- The four Diátaxis quadrant names are now reserved at `docs/{tutorials,how-to,reference,explanation}/` in adopting repositories. Future ADRs that need additional top-level directories under `docs/` should reference this ADR explicitly.
+- The four Diátaxis quadrant names are now reserved at `docs/{tutorials,how-to,reference,explanation}/` in adopting repositories. The adjunct genre names `docs/diagrams/` and `docs/runbooks/` are also reserved. Future changes to top-level directories under `docs/` should update this ADR explicitly.
 - Composite operational documents are an explicit accommodation rather than a violation; their boundaries are codified in the Decision Outcome and Confirmation sections above.
 - ADRs continue to be governed by ADR-0001 and are unaffected by this decision other than by cross-reference.
 
@@ -161,6 +173,7 @@ This decision rests on the following assumptions. If any becomes false, this ADR
 2. The four-quadrant taxonomy continues to map cleanly to the documentation needs that arise in this portfolio. If a sustained category of need cannot be classified into one of the four quadrants, that pattern is itself evidence to reconsider.
 3. Markdown remains the primary documentation format in adopting repositories.
 4. Repositories prefer source-controlled documentation that travels with the code over externally hosted knowledge bases.
+5. Mermaid remains a viable text-based diagram format that GitHub can render natively.
 
 ## Supersedes
 
@@ -192,3 +205,9 @@ This ADR establishes a documentation organization convention, not a deployed sec
 | ISO/IEC 27001:2022     | A.5.37 (Documented operating procedures)                       | `docs/how-to/` and operational composite documents under `docs/reference/` provide a predictable location for documented procedures.    |
 
 Subsequent repository-level ADRs that scope this convention to specific compliance contexts should keep only the rows that genuinely apply to their decision.
+
+## Changelog
+
+| Date       | Change                                      | Reason                                                    | Author/Role                       | Body-diff? |
+| ---------- | ------------------------------------------- | --------------------------------------------------------- | --------------------------------- | ---------- |
+| 2026-06-02 | Added diagram and runbook documentation genres. | House diagram source files and operator procedures without distorting Diátaxis quadrants. | Portfolio maintainer / governance | Yes        |
