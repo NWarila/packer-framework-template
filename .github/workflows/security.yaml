@@ -24,25 +24,25 @@ jobs:
   iac:
     name: IaC and secret scan
     permissions:
-      contents: read
-      security-events: write
-      actions: read
-    uses: NWarila/.github/.github/workflows/reusable-iac-security.yaml@e7456b0219e8750fbef8bd70a0f1ccf7d47f1c20
+      contents: read # required by Trivy, Gitleaks, and zizmor to inspect the repo
+      security-events: write # required to upload scanner SARIF
+      actions: read # required for SARIF upload workflow metadata
+    uses: NWarila/.github/.github/workflows/reusable-iac-security.yaml@16fc66816dea5a593c0d5fbb0574ce3b54b46991
 
   codeql:
     name: CodeQL
     permissions:
-      contents: read
-      security-events: write
-      actions: read
-    uses: NWarila/.github/.github/workflows/reusable-codeql.yaml@e7456b0219e8750fbef8bd70a0f1ccf7d47f1c20
+      contents: read # required by CodeQL to analyze repository contents
+      security-events: write # required to upload CodeQL SARIF
+      actions: read # required by CodeQL for workflow analysis metadata
+    uses: NWarila/.github/.github/workflows/reusable-codeql.yaml@16fc66816dea5a593c0d5fbb0574ce3b54b46991
 
   scorecard:
     name: OpenSSF Scorecard
     if: ${{ github.event_name != 'pull_request' && github.event_name != 'merge_group' }}
     permissions:
-      security-events: write
-      id-token: write
-      actions: read
-      contents: read
-    uses: NWarila/.github/.github/workflows/reusable-scorecard.yaml@e7456b0219e8750fbef8bd70a0f1ccf7d47f1c20
+      security-events: write # required to upload Scorecard SARIF
+      id-token: write # required by Scorecard for OIDC-backed publishing paths
+      actions: read # required by Scorecard for workflow security checks
+      contents: read # required by Scorecard to inspect repository contents
+    uses: NWarila/.github/.github/workflows/reusable-scorecard.yaml@16fc66816dea5a593c0d5fbb0574ce3b54b46991

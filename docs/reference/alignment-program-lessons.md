@@ -4,19 +4,19 @@ This reference preserves durable lessons from the org workflow and manifest alig
 
 ## Reusable Workflows
 
-Universal reusable workflows should live once per namespace control plane and be called by full commit SHA. Duplicating their bodies into templates made security fixes slower and manifest obligations less honest. See [ADR-0007](../decision-records/0007-centralize-universal-ci-reusables-within-each-namespace.md).
+Universal reusable workflows should live once per namespace control plane and be called by full commit SHA. Duplicating their bodies into templates made security fixes slower and manifest obligations less honest. See [ADR-0007](https://github.com/NWarila/.github/blob/main/docs/decision-records/0007-centralize-universal-ci-reusables-within-each-namespace.md).
 
 Reusable workflow syntax checks are not enough. A reusable should be smoke-tested through a real caller path in its source repository, especially when it installs tools, builds policy input, or performs conditional write-token work.
 
 ## Repo Hygiene
 
-Repo-hygiene enforcement is a policy requirement, not a specific file-name requirement. A repository with a local verification harness can evaluate the policy there. A data-only repository should use the thin reusable caller. See [ADR-0008](../decision-records/0008-enforce-repo-hygiene-by-repo-type.md).
+Repo-hygiene enforcement is a policy requirement, not a specific file-name requirement. A repository with a local verification harness can evaluate the policy there. A data-only repository should use the thin reusable caller. See [ADR-0008](https://github.com/NWarila/.github/blob/main/docs/decision-records/0008-enforce-repo-hygiene-by-repo-type.md).
 
 Privileged `pull_request_target` workflows stay safe by construction, policy, and immutable pinning. The reusable does not need to be local for the policy to inspect unsafe caller patterns.
 
 ## Manifests
 
-Manifests should be lean. Byte identity is for inherited governance and files the consumer actually runs. Template-internal tools, tests, fixtures, and policies belong in the template unless the consumer uses them. See [ADR-0009](../decision-records/0009-classify-baseline-manifest-byte-identity.md).
+Manifests should be lean. Byte identity is for inherited governance and files the consumer actually runs. Template-internal tools, tests, fixtures, and policies belong in the template unless the consumer uses them. See [ADR-0009](https://github.com/NWarila/.github/blob/main/docs/decision-records/0009-classify-baseline-manifest-byte-identity.md).
 
 Repo-customizable configs are a common overreach. Mature consumers may have richer `.gitattributes`, pre-commit, lint, or editor settings than a template seed. Treat those files as starters unless the template has a specific reason to enforce exact bytes.
 
