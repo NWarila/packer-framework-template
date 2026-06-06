@@ -1,6 +1,6 @@
 # Mirroring Reference
 
-This reference describes how inherited files move from control-plane and template repositories into adopting repositories. It is governed by [ADR-0001](../decision-records/0001-use-architecture-decision-records.md), [ADR-0006](../decision-records/0006-keep-github-control-planes-namespace-local.md), and [ADR-0009](../decision-records/0009-classify-baseline-manifest-byte-identity.md).
+This reference describes how inherited files move from control-plane and template repositories into adopting repositories. It is governed by [ADR-0001](https://github.com/NWarila/.github/blob/main/docs/decision-records/0001-use-architecture-decision-records.md), [ADR-0006](https://github.com/NWarila/.github/blob/main/docs/decision-records/0006-keep-github-control-planes-namespace-local.md), and [ADR-0009](https://github.com/NWarila/.github/blob/main/docs/decision-records/0009-classify-baseline-manifest-byte-identity.md).
 
 ## Core Rule
 
