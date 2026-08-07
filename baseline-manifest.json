@@ -2,10 +2,6 @@
   "version": "2",
   "byte_identical": [
     {
-      "source": ".github/workflows/security.yaml",
-      "target": ".github/workflows/security.yaml"
-    },
-    {
       "source": "docs/reference/mirroring.md",
       "target": "docs/reference/mirroring.md"
     },
@@ -34,6 +30,10 @@
     {
       "source": ".github/renovate.json5",
       "target": ".github/renovate.json5"
+    },
+    {
+      "source": ".github/workflows/security.yaml",
+      "target": ".github/workflows/security.yaml"
     },
     {
       "source": ".gitignore",
