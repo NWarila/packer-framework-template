@@ -81,6 +81,18 @@
       "matchStrings": [
         "# renovate: depName=(?<depName>[^\\s]+) packageName=(?<packageName>[^\\s]+) currentValue=(?<currentValue>[^\\s]+)\\s+(?:template_ref|framework_ref|source-ref):\\s*(?<currentDigest>[0-9a-f]{40})"
       ]
+    },
+    {
+      // Update the image version and its digest together.
+      "customType": "regex",
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.*\\.ya?ml$/"
+      ],
+      "versioningTemplate": "semver",
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-zA-Z0-9._-]+) depName=(?<depName>[^\\s]+)\\s+version:\\s*(?<currentValue>[^\\s]+)\\s+digest:\\s*(?<currentDigest>sha256:[a-f0-9]{64})",
+        "# renovate: datasource=(?<datasource>[a-zA-Z0-9._-]+) depName=(?<depName>[^\\s]+)\\s+version=(?<currentValue>[^\\s]+)\\s+digest=(?<currentDigest>sha256:[a-f0-9]{64})"
+      ]
     }
   ],
 
@@ -108,6 +120,12 @@
       "groupName": "actions/upload-artifact",
       "semanticCommitType": "ci",
       "semanticCommitScope": "deps"
+    },
+    {
+      // Docker registry metadata has no release time, so exempt first-party
+      // images from the strict seven-day quarantine or every update is held.
+      "matchPackageNames": ["ghcr.io/nwarila-platform/**"],
+      "minimumReleaseAge": null
     }
   ]
 }
