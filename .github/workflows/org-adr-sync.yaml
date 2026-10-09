@@ -27,6 +27,6 @@ jobs:
         with:
           source-repo: NWarila/.github
           # renovate: depName=NWarila/.github packageName=NWarila/.github
-          source-ref: e8bc517828a9915a401096305124dff316b76644
+          source-ref: 16fc66816dea5a593c0d5fbb0574ce3b54b46991
           manifest: org-adr-manifest.json
           check-name: org-adr / verify

@@ -56,6 +56,46 @@ CI focus:
 - Does repo-hygiene pass against the control plane itself?
 - Is public source-control hygiene clean?
 
+## Reusable-Workflow Call Graph
+
+The diagram below shows how a consumer repo calls the seven universal reusables
+hosted in `NWarila/.github`, and how the drift-gate artefacts (`baseline-manifest.json`
+and `org-adr-manifest.json`) relate to `reusable-repo-hygiene` and
+`reusable-org-adr-auto-sync`.
+
+Source: [docs/diagrams/reusable-workflow-call-graph.mmd](../diagrams/reusable-workflow-call-graph.mmd)
+
+```mermaid
+flowchart TD
+    Consumer["Consumer repo\n(caller workflow)"]
+
+    subgraph NWarila_github ["NWarila/.github — pinned by SHA"]
+        codeql["reusable-codeql.yaml"]
+        iac["reusable-iac-security.yaml"]
+        scorecard["reusable-scorecard.yaml"]
+        release["reusable-release-please.yaml"]
+        automerge["reusable-auto-merge.yaml"]
+        hygiene["reusable-repo-hygiene.yaml"]
+        adrsync["reusable-org-adr-auto-sync.yaml"]
+    end
+
+    subgraph Drift_gates ["Drift-gate artefacts (NWarila/.github)"]
+        baseline["baseline-manifest.json\n(byte-identical file list)"]
+        adrmanifest["org-adr-manifest.json\n(ADR source-of-truth list)"]
+    end
+
+    Consumer -->|"uses: NWarila/.github/.github/workflows/reusable-codeql.yaml@SHA"| codeql
+    Consumer -->|"uses: NWarila/.github/.github/workflows/reusable-iac-security.yaml@SHA"| iac
+    Consumer -->|"uses: NWarila/.github/.github/workflows/reusable-scorecard.yaml@SHA"| scorecard
+    Consumer -->|"uses: NWarila/.github/.github/workflows/reusable-release-please.yaml@SHA"| release
+    Consumer -->|"uses: NWarila/.github/.github/workflows/reusable-auto-merge.yaml@SHA"| automerge
+    Consumer -->|"uses: NWarila/.github/.github/workflows/reusable-repo-hygiene.yaml@SHA"| hygiene
+    Consumer -->|"uses: NWarila/.github/.github/workflows/reusable-org-adr-auto-sync.yaml@SHA"| adrsync
+
+    hygiene -->|"fetches + evaluates"| baseline
+    adrsync -->|"reads manifest to detect drift"| adrmanifest
+```
+
 ## Practical Consequence
 
 The same governance doctrine can produce different visible file shapes. A framework template may enforce repo hygiene through `make ci`; a data-only runner may use a standalone caller. A control plane may own reusable workflow bodies; a consumer may only own thin callers. That variation is intentional when it follows repository responsibility.

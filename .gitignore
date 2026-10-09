@@ -173,8 +173,8 @@
 !/docs/decision-records/org/0006-keep-github-control-planes-namespace-local.md
 !/docs/decision-records/org/0007-centralize-universal-ci-reusables-within-each-namespace.md
 !/docs/decision-records/org/0008-enforce-repo-hygiene-by-repo-type.md
-!/docs/decision-records/org/0010-keep-ai-attribution-out-of-version-control.md
 !/docs/decision-records/org/0009-classify-baseline-manifest-byte-identity.md
+!/docs/decision-records/org/0011-adopt-two-organization-portfolio-structure.md
 !/.github/workflows/org-adr-sync.yaml
 !/.github/workflows/org-adr-auto-sync.yaml
 !/docs/reference/diagram-conventions.md
@@ -182,9 +182,11 @@
 !/docs/reference/ci-alignment-design-intent.md
 !/docs/reference/ci-validator-invocation.md
 !/docs/explanation/repo-type-taxonomy-and-ci-focus.md
+!/docs/diagrams/
 !/docs/diagrams/.gitkeep
 !/docs/diagrams/architecture.mmd
+!/docs/diagrams/example-flow.mmd
+!/docs/diagrams/reusable-workflow-call-graph.mmd
 !/docs/tutorials/derive-your-first-packer-framework.md
 !/docs/decision-records/repo/0001-use-credential-free-file-builder-for-reference-validation.md
 !/docs/runbooks/.gitkeep
-!/docs/runbooks/purge-ai-attributed-history.md

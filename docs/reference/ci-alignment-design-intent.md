@@ -6,6 +6,7 @@ CI in this portfolio is divided by repository responsibility. The goal is not fo
 
 | Repository type | Owns | CI should prove |
 | --------------- | ---- | --------------- |
+| Namespace `.github` control plane | Org ADRs, community files, universal reusable workflows, org policy | Source-side reusable smoke tests, ADR schema, docs layout, baseline manifest, repo hygiene |
 | Framework template | Reusable framework logic and stack-specific workflows | Code quality, policy correctness, template contract, framework build or validation, release evidence |
 | Runner template | Data-only execution shape and caller contract | Contract shape, inherited org policy through thin callers, runtime validation appropriate to the runner |
 | Runner consumer | Repository-specific variables/resources and actual execution | Secret safety, inherited drift, outcome verification, and narrow runtime checks |

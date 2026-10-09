@@ -12,7 +12,7 @@ Every validator that carries a governance claim should have one visible invocati
 | Markdown and docs layout | CI jobs that run markdown linting and docs layout checks |
 | ADR schema | A CI job that compares changed ADRs against the pull request base |
 | Baseline manifest | A CI job or drift-gate workflow that checks source and target entries |
-| Repo hygiene | Local harness evaluation or the reusable caller, per [ADR-0008](../decision-records/0008-enforce-repo-hygiene-by-repo-type.md) |
+| Repo hygiene | Local harness evaluation or the reusable caller, per [ADR-0008](https://github.com/NWarila/.github/blob/main/docs/decision-records/0008-enforce-repo-hygiene-by-repo-type.md) |
 
 ## PR Review Questions
 

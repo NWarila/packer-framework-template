@@ -35,9 +35,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
-      attestations: write
-      contents: write
-      id-token: write
+      attestations: write # required to publish release attestations
+      contents: write # required to attach release evidence
+      id-token: write # required for OIDC-backed attestation signing
     defaults:
       run:
         shell: bash

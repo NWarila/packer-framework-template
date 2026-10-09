@@ -20,7 +20,7 @@ This directory holds the Architecture Decision Records (ADRs) governing this Pac
 | [ADR-0007](org/0007-centralize-universal-ci-reusables-within-each-namespace.md) | Accepted | Centralize universal CI reusables within each namespace. |
 | [ADR-0008](org/0008-enforce-repo-hygiene-by-repo-type.md) | Accepted | Enforce repo hygiene by repo type. |
 | [ADR-0009](org/0009-classify-baseline-manifest-byte-identity.md) | Accepted | Classify baseline-manifest byte identity. |
-| [ADR-0010](org/0010-keep-ai-attribution-out-of-version-control.md) | Accepted | Keep AI attribution out of version control. |
+| [ADR-0011](org/0011-adopt-two-organization-portfolio-structure.md) | Proposed | Adopt a two-organization portfolio structure. |
 
 ADR-template/0003 was withdrawn before release and is intentionally absent.
 
